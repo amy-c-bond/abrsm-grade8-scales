@@ -186,9 +186,6 @@ class ScaleChallenge {
                                     <button id="play-reference" class="btn btn-primary">
                                         <i class="bi bi-play-fill me-2"></i><span id="play-button-text">Play Scale</span>
                                     </button>
-                                    <button id="stop-audio" class="btn btn-outline-danger" disabled>
-                                        <i class="bi bi-stop-fill me-2"></i>Stop
-                                    </button>
                                     <div class="vr"></div>
                                     <div class="tempo-control">
                                         <label class="form-label mb-1 small">Tempo</label>
@@ -664,7 +661,6 @@ class ScaleChallenge {
     attachEventListeners() {
         // Audio Player Controls
         const playBtn = document.getElementById('play-reference');
-        const stopBtn = document.getElementById('stop-audio');
         const tempoInput = document.getElementById('tempo-input');
         const tempoUpBtn = document.getElementById('tempo-up');
         const tempoDownBtn = document.getElementById('tempo-down');
@@ -680,7 +676,6 @@ class ScaleChallenge {
                     playBtn.classList.add('btn-primary');
                     playButtonText.textContent = 'Play Scale';
                     playBtn.innerHTML = '<i class="bi bi-play-fill me-2"></i><span id="play-button-text">Play Scale</span>';
-                    stopBtn.disabled = true;
                     if (audioStatus) audioStatus.textContent = '';
                 } else {
                     // Start playback
@@ -689,7 +684,6 @@ class ScaleChallenge {
                     playBtn.classList.add('btn-danger');
                     playButtonText.textContent = 'Stop';
                     playBtn.innerHTML = '<i class="bi bi-stop-fill me-2"></i><span id="play-button-text">Stop</span>';
-                    stopBtn.disabled = false;
                     if (audioStatus) audioStatus.textContent = 'Playing...';
                     
                     await audioPlayer.play(this.currentScale, tempo);
@@ -698,20 +692,8 @@ class ScaleChallenge {
                     playBtn.classList.remove('btn-danger');
                     playBtn.classList.add('btn-primary');
                     playBtn.innerHTML = '<i class="bi bi-play-fill me-2"></i><span id="play-button-text">Play Scale</span>';
-                    stopBtn.disabled = true;
                     if (audioStatus) audioStatus.textContent = '';
                 }
-            });
-        }
-
-        if (stopBtn) {
-            stopBtn.addEventListener('click', () => {
-                audioPlayer.stop();
-                playBtn.classList.remove('btn-danger');
-                playBtn.classList.add('btn-primary');
-                playBtn.innerHTML = '<i class="bi bi-play-fill me-2"></i><span id="play-button-text">Play Scale</span>';
-                stopBtn.disabled = true;
-                if (audioStatus) audioStatus.textContent = '';
             });
         }
 

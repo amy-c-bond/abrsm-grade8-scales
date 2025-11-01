@@ -146,7 +146,7 @@ class Metronome {
             oscillator.type = 'sine';
             oscillator.frequency.value = isDownbeat ? 1000 : 800;
             
-            gain.gain.value = isDownbeat ? 0.4 : 0.25;
+            gain.gain.value = isDownbeat ? 0.7 : 0.5; // Increased from 0.4/0.25 to 0.7/0.5
             gain.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
             
             oscillator.connect(gain);
@@ -164,8 +164,10 @@ class Metronome {
      * Move to the next beat
      */
     nextNote() {
-        // Calculate time of next beat
-        const secondsPerBeat = 60.0 / this.tempo;
+        // Tempo is in minims per minute, but metronome clicks on quarter notes
+        // Convert minim BPM to quarter note BPM: minim_bpm * 2
+        const quarterNoteBPM = this.tempo * 2;
+        const secondsPerBeat = 60.0 / quarterNoteBPM;
         this.nextBeatTime += secondsPerBeat;
 
         // Advance beat counter

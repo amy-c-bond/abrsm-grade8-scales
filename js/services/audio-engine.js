@@ -159,7 +159,7 @@ class AudioEngine {
         let isStopped = false;
         
         // Generate scale notes using MusicTheory
-        const rootNote = scale.key + '4'; // Start at octave 4
+        const rootNote = scale.key + '2'; // Start at octave 2 (2 octaves lower than before)
         const scaleType = this.getScaleTypeForGeneration(scale);
         const octaves = scale.range?.octaves || 2;
         
@@ -171,9 +171,12 @@ class AudioEngine {
             return { stop: () => {} };
         }
 
-        // Calculate note duration based on tempo
-        // For scales, we typically use quarter notes or eighth notes
-        const noteDuration = MusicTheory.noteDuration(tempo, 'eighth');
+        // Tempo is in minims (half notes) per minute
+        // Convert to quarter note BPM: minim BPM * 2 = quarter note BPM
+        // Then we play eighth notes, so we need to account for that
+        // For eighth notes at a given minim tempo: minim_bpm * 2 (to get quarter) * 2 (for eighths) = minim_bpm * 4
+        const quarterNoteBPM = tempo * 2; // Convert minim BPM to quarter note BPM
+        const noteDuration = MusicTheory.noteDuration(quarterNoteBPM, 'eighth');
         const noteGap = 0.05; // Small gap between notes for clarity
         
         // Play notes sequentially
