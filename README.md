@@ -20,7 +20,7 @@ A modern, interactive web application designed to help ABRSM Grade 8 pianists ma
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/YOUR-USERNAME/abrsm-grade8-scales.git
+   git clone https://github.com/amy-c-bond/abrsm-grade8-scales.git
    cd abrsm-grade8-scales
    ```
 
@@ -107,7 +107,7 @@ The ABRSM (Associated Board of the Royal Schools of Music) Grade 8 examination r
 
 ## 📧 Contact
 
-Project Link: [https://github.com/YOUR-USERNAME/abrsm-grade8-scales](https://github.com/YOUR-USERNAME/abrsm-grade8-scales)
+Project Link: [https://github.com/amy-c-bond/abrsm-grade8-scales](https://github.com/amy-c-bond/abrsm-grade8-scales)
 
 ---
 
