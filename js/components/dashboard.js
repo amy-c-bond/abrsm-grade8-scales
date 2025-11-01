@@ -39,6 +39,92 @@ class Dashboard {
                             <button id="random-scale-btn" class="btn btn-primary btn-lg px-5">
                                 <i class="bi bi-shuffle me-2"></i>Start Random Practice
                             </button>
+                            <div class="mt-3">
+                                <button id="show-filters-btn" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-sliders me-1"></i>Advanced Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Filters (Initially Hidden) -->
+            <div id="advanced-filters" class="row mb-4" style="display: none;">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">
+                                <i class="bi bi-sliders text-primary me-2"></i>Randomizer Filters
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label for="filter-key" class="form-label small">Key</label>
+                                    <select id="filter-key" class="form-select form-select-sm">
+                                        <option value="">All Keys</option>
+                                        <option value="C">C</option>
+                                        <option value="Eb">E♭</option>
+                                        <option value="F#">F#</option>
+                                        <option value="A">A</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="filter-type" class="form-label small">Type</label>
+                                    <select id="filter-type" class="form-select form-select-sm">
+                                        <option value="">All Types</option>
+                                        <option value="scale">Scales Only</option>
+                                        <option value="arpeggio">Arpeggios Only</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="filter-category" class="form-label small">Category</label>
+                                    <select id="filter-category" class="form-select form-select-sm">
+                                        <option value="">All Categories</option>
+                                        <option value="major">Major</option>
+                                        <option value="minor">Minor</option>
+                                        <option value="minorHarmonic">Harmonic Minor</option>
+                                        <option value="minorMelodic">Melodic Minor</option>
+                                        <option value="chromatic">Chromatic</option>
+                                        <option value="wholeTone">Whole-Tone</option>
+                                        <option value="dominant7">Dominant 7th</option>
+                                        <option value="diminished7">Diminished 7th</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="filter-difficulty" class="form-label small">Difficulty</label>
+                                    <select id="filter-difficulty" class="form-select form-select-sm">
+                                        <option value="">All Levels</option>
+                                        <option value="3">Easy (1-3)</option>
+                                        <option value="5">Medium (4-6)</option>
+                                        <option value="7">Hard (7-10)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="weighting-toggle" checked>
+                                        <label class="form-check-label small" for="weighting-toggle">
+                                            Use adaptive weighting (prioritize scales needing practice)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12 d-flex gap-2">
+                                    <button id="apply-filters-btn" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-check-circle me-1"></i>Apply Filters
+                                    </button>
+                                    <button id="clear-filters-btn" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-x-circle me-1"></i>Clear All
+                                    </button>
+                                    <div class="ms-auto">
+                                        <small class="text-muted">
+                                            <span id="filter-stats">All scales available</span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -228,6 +314,37 @@ class Dashboard {
     }
 
     /**
+     * Apply randomizer filters
+     */
+    applyRandomizerFilters() {
+        const filterKey = document.getElementById('filter-key').value;
+        const filterType = document.getElementById('filter-type').value;
+        const filterCategory = document.getElementById('filter-category').value;
+        const filterDifficulty = document.getElementById('filter-difficulty').value;
+
+        randomizer.setFilters({
+            key: filterKey || null,
+            type: filterType || null,
+            category: filterCategory || null,
+            difficulty: filterDifficulty ? parseInt(filterDifficulty) : null
+        });
+
+        this.updateFilterStats();
+        Helpers.showToast('Filters applied', 'success');
+    }
+
+    /**
+     * Update filter statistics display
+     */
+    updateFilterStats() {
+        const filterStatsEl = document.getElementById('filter-stats');
+        if (filterStatsEl && randomizer) {
+            const stats = randomizer.getStatistics();
+            filterStatsEl.textContent = `${stats.available} of ${stats.total} scales available`;
+        }
+    }
+
+    /**
      * Filter scales based on search and type filter
      */
     async filterScales() {
@@ -267,12 +384,60 @@ class Dashboard {
      * Attach event listeners
      */
     attachEventListeners() {
-        // Random scale button
+        // Initialize randomizer
+        if (!randomizer) {
+            randomizer = new Randomizer();
+        }
+
+        // Random scale button - use enhanced randomizer
         const randomBtn = document.getElementById('random-scale-btn');
         if (randomBtn) {
             randomBtn.addEventListener('click', async () => {
-                const scale = ScalesData.getRandomScale();
+                const scale = await randomizer.getRandomScale();
                 eventBus.emit(Events.SCALE_SELECTED, scale);
+            });
+        }
+
+        // Show/hide filters
+        const showFiltersBtn = document.getElementById('show-filters-btn');
+        const advancedFilters = document.getElementById('advanced-filters');
+        if (showFiltersBtn && advancedFilters) {
+            showFiltersBtn.addEventListener('click', () => {
+                const isHidden = advancedFilters.style.display === 'none';
+                advancedFilters.style.display = isHidden ? 'flex' : 'none';
+                showFiltersBtn.innerHTML = isHidden ? 
+                    '<i class="bi bi-x-lg me-1"></i>Hide Filters' : 
+                    '<i class="bi bi-sliders me-1"></i>Advanced Filters';
+            });
+        }
+
+        // Apply filters
+        const applyFiltersBtn = document.getElementById('apply-filters-btn');
+        if (applyFiltersBtn) {
+            applyFiltersBtn.addEventListener('click', () => {
+                this.applyRandomizerFilters();
+            });
+        }
+
+        // Clear filters
+        const clearFiltersBtn = document.getElementById('clear-filters-btn');
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', () => {
+                randomizer.clearFilters();
+                document.getElementById('filter-key').value = '';
+                document.getElementById('filter-type').value = '';
+                document.getElementById('filter-category').value = '';
+                document.getElementById('filter-difficulty').value = '';
+                this.updateFilterStats();
+                Helpers.showToast('Filters cleared', 'success');
+            });
+        }
+
+        // Weighting toggle
+        const weightingToggle = document.getElementById('weighting-toggle');
+        if (weightingToggle) {
+            weightingToggle.addEventListener('change', (e) => {
+                randomizer.setWeighting(e.target.checked);
             });
         }
 

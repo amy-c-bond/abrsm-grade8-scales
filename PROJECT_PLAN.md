@@ -90,14 +90,29 @@ A single-page HTML application designed to help ABRSM Grade 8 pianists practice 
 
 ## Phase 3: Randomizer & Challenge System 🔄 IN PROGRESS
 
-### 3.1 Scale Randomizer Engine ✅ CORE COMPLETE
-- **Status**: Basic randomizer working, advanced features pending
+### 3.1 Scale Randomizer Engine ✅ COMPLETE
+- **Status**: Fully implemented with weighted selection and advanced filtering
 - **Completed Tasks**:
   - ✅ Random scale selection algorithm implemented in dashboard
   - ✅ Scale filtering by search in dashboard
-  - ⏳ **Next**: Weighted randomization based on progress data
-  - ⏳ **Next**: Advanced filters (scale type, key, difficulty)
-  - ⏳ **Next**: History tracking to prevent immediate repetition
+  - ✅ **Weighted randomization based on progress data**
+    - Scales with lower accuracy get higher priority (2x weight if <70%, 1.5x if <85%)
+    - Less practiced scales get higher priority (1.3x if <5 attempts, 1.1x if <10)
+  - ✅ **Advanced filters** implemented:
+    - Filter by key (C, Eb, F#, A)
+    - Filter by type (scale/arpeggio)
+    - Filter by category (major, minor, chromatic, etc.)
+    - Filter by difficulty level (easy/medium/hard)
+    - Toggle adaptive weighting on/off
+  - ✅ **History tracking** to prevent immediate repetition:
+    - Maintains last 10 practiced scales
+    - Excludes them from random selection
+    - Auto-clears history if no scales available
+  - ✅ **Additional features**:
+    - Practice routine generator (based on session length)
+    - Difficulty-based recommendations
+    - Filter statistics display
+    - Fallback mechanisms for edge cases
 
 ### 3.2 Challenge Interface 🔄 PARTIALLY COMPLETE
 - **Status**: Core challenge view complete, audio features pending
