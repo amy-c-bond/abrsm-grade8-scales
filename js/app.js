@@ -50,6 +50,10 @@ class App {
             const dashboardView = document.getElementById('dashboard-view');
             if (dashboardView) {
                 dashboardView.classList.add('active');
+                console.log('Dashboard view activated, has classes:', dashboardView.className);
+                console.log('Dashboard content:', dashboardView.innerHTML.substring(0, 100));
+            } else {
+                console.error('Dashboard view not found!');
             }
             
             this.currentView = 'dashboard';
@@ -162,6 +166,9 @@ class App {
         const appContainer = document.getElementById('app-container');
         if (appContainer) {
             appContainer.classList.remove('d-none');
+            console.log('App container shown, has classes:', appContainer.className);
+        } else {
+            console.error('App container not found!');
         }
     }
 

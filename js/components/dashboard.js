@@ -21,9 +21,11 @@ class Dashboard {
      * Render dashboard content
      */
     async render() {
+        console.log('Dashboard rendering...');
         const stats = await progressTracker.getUserStatistics();
         const weakAreas = await progressTracker.getWeakAreas(3);
         const allScales = await database.getAllScales();
+        console.log('Dashboard data loaded:', { stats, weakAreas: weakAreas.length, scales: allScales.length });
 
         this.container.innerHTML = `
             <!-- Hero Section -->
