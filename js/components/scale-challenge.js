@@ -41,11 +41,24 @@ class ScaleChallenge {
     async render() {
         const scale = this.currentScale;
         
-        // Generate scale notes - use startNote from range which includes octave
-        const notes = MusicTheory.generateScale(scale.range.startNote, scale.category, scale.range.octaves);
+        // Generate scale notes - use the correct method based on type
+        let notes;
+        if (scale.type === 'arpeggio') {
+            // For arpeggios, use arpeggio intervals
+            const intervals = scale.category === 'major' 
+                ? MusicTheory.INTERVALS.majorArpeggio 
+                : MusicTheory.INTERVALS.minorArpeggio;
+            notes = this.generateArpeggio(scale.range.startNote, intervals, scale.range.octaves);
+        } else {
+            // For scales, use generateScale
+            notes = MusicTheory.generateScale(scale.range.startNote, scale.category, scale.range.octaves);
+        }
         
-        // Extract just the note names for display
-        const noteNames = notes.map(n => n.name);
+        // Split notes into right hand (treble) and left hand (bass)
+        // Typically split at middle C (C4)
+        const middleC = 60; // MIDI note for C4
+        const rightHandNotes = notes.filter(n => n.midi >= middleC);
+        const leftHandNotes = notes.filter(n => n.midi < middleC);
         
         this.container.innerHTML = `
             <!-- Challenge Header -->
@@ -239,92 +252,144 @@ class ScaleChallenge {
         `;
         
         // Render musical notation after HTML is inserted
-        this.renderNotation(notes);
+        this.renderNotation(rightHandNotes, leftHandNotes);
+    }
+
+    /**
+     * Generate arpeggio notes
+     * @param {string} rootNote - Root note with octave (e.g., "C2")
+     * @param {Array} intervals - Array of intervals
+     * @param {number} octaves - Number of octaves
+     * @returns {Array} Array of note objects
+     */
+    generateArpeggio(rootNote, intervals, octaves) {
+        const notes = [];
+        let currentMidi = MusicTheory.noteNameToMidi(rootNote);
+        const preferFlats = rootNote.includes('b');
+
+        // For arpeggios: root, 3rd, 5th, octave, then repeat
+        for (let octave = 0; octave < octaves; octave++) {
+            for (let i = 0; i < intervals.length; i++) {
+                notes.push({
+                    name: MusicTheory.midiToNoteName(currentMidi, preferFlats),
+                    midi: currentMidi,
+                    frequency: MusicTheory.midiToFrequency(currentMidi)
+                });
+                currentMidi += intervals[i];
+            }
+        }
+        
+        // Add final tonic
+        notes.push({
+            name: MusicTheory.midiToNoteName(currentMidi, preferFlats),
+            midi: currentMidi,
+            frequency: MusicTheory.midiToFrequency(currentMidi)
+        });
+
+        return notes;
     }
 
     /**
      * Render musical notation using VexFlow
-     * @param {Array} notes - Array of note objects with name, midi, frequency
+     * @param {Array} rightHandNotes - Array of note objects for right hand (treble clef)
+     * @param {Array} leftHandNotes - Array of note objects for left hand (bass clef)
      */
-    renderNotation(notes) {
+    renderNotation(rightHandNotes, leftHandNotes) {
         try {
             const VF = Vex.Flow;
             
             const div = document.getElementById('notation-output');
             div.innerHTML = ''; // Clear previous content
             
-            // Create renderer
+            // Create renderer with enough height for two staves
             const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-            renderer.resize(900, 200);
+            renderer.resize(900, 400);
             const context = renderer.getContext();
             
-            // Create stave
-            const stave = new VF.Stave(10, 40, 880);
-            stave.addClef('treble');
-            stave.setContext(context).draw();
-            
-            // Convert notes to VexFlow format (use 8th notes for compactness)
-            const vexNotes = notes.map(note => {
-                // Parse note name (e.g., "C4" -> note: "C", octave: "4")
-                const match = note.name.match(/^([A-G][#b]?)(\d+)$/);
-                if (!match) return null;
-                
-                const [, noteName, octave] = match;
-                let vexNoteName = noteName.toLowerCase();
-                
-                // Handle accidentals - VexFlow uses different notation
-                const hasSharp = noteName.includes('#');
-                const hasFlat = noteName.includes('b');
-                
-                // Remove accidental from note name for VexFlow
-                if (hasSharp || hasFlat) {
-                    vexNoteName = noteName[0].toLowerCase();
-                }
-                
-                const vexNote = new VF.StaveNote({
-                    keys: [vexNoteName + '/' + octave],
-                    duration: '8' // 8th note
-                });
-                
-                // Add accidental modifier
-                if (hasSharp) {
-                    vexNote.addModifier(new VF.Accidental('#'), 0);
-                } else if (hasFlat) {
-                    vexNote.addModifier(new VF.Accidental('b'), 0);
-                }
-                
-                return vexNote;
-            }).filter(n => n !== null);
-            
-            // Limit to first 16 notes to fit on one stave
-            const displayNotes = vexNotes.slice(0, 16);
-            
-            // Add beams to group 8th notes
-            const beams = VF.Beam.generateBeams(displayNotes);
-            
-            // Create voice and format
-            const voice = new VF.Voice({ num_beats: displayNotes.length, beat_value: 8 });
-            voice.addTickables(displayNotes);
-            
-            // Format and draw
-            new VF.Formatter()
-                .joinVoices([voice])
-                .format([voice], 850);
-            
-            voice.draw(context, stave);
-            
-            // Draw beams
-            beams.forEach(beam => beam.setContext(context).draw());
-            
-            // Show note count if truncated
-            if (notes.length > 16) {
-                const noteInfo = document.createElement('p');
-                noteInfo.className = 'text-muted small mt-2 mb-0';
-                noteInfo.textContent = `Showing first 16 of ${notes.length} notes`;
-                div.appendChild(noteInfo);
+            // Helper function to convert notes to VexFlow format
+            const convertToVexNotes = (notes, maxNotes = 16) => {
+                return notes.slice(0, maxNotes).map(note => {
+                    // Parse note name (e.g., "C4" -> note: "C", octave: "4")
+                    const match = note.name.match(/^([A-G][#b]?)(\d+)$/);
+                    if (!match) return null;
+                    
+                    const [, noteName, octave] = match;
+                    let vexNoteName = noteName.toLowerCase();
+                    
+                    // Handle accidentals
+                    const hasSharp = noteName.includes('#');
+                    const hasFlat = noteName.includes('b');
+                    
+                    // Remove accidental from note name for VexFlow
+                    if (hasSharp || hasFlat) {
+                        vexNoteName = noteName[0].toLowerCase();
+                    }
+                    
+                    const vexNote = new VF.StaveNote({
+                        keys: [vexNoteName + '/' + octave],
+                        duration: '8' // 8th note
+                    });
+                    
+                    // Add accidental modifier
+                    if (hasSharp) {
+                        vexNote.addModifier(new VF.Accidental('#'), 0);
+                    } else if (hasFlat) {
+                        vexNote.addModifier(new VF.Accidental('b'), 0);
+                    }
+                    
+                    return vexNote;
+                }).filter(n => n !== null);
+            };
+
+            // Render treble clef (right hand) if there are notes
+            if (rightHandNotes && rightHandNotes.length > 0) {
+                const trebleStave = new VF.Stave(10, 40, 880);
+                trebleStave.addClef('treble');
+                trebleStave.setText('R.H.', VF.Modifier.Position.ABOVE);
+                trebleStave.setContext(context).draw();
+
+                const vexNotes = convertToVexNotes(rightHandNotes);
+                const beams = VF.Beam.generateBeams(vexNotes);
+
+                const voice = new VF.Voice({ num_beats: vexNotes.length, beat_value: 8 });
+                voice.addTickables(vexNotes);
+
+                new VF.Formatter()
+                    .joinVoices([voice])
+                    .format([voice], 850);
+
+                voice.draw(context, trebleStave);
+                beams.forEach(beam => beam.setContext(context).draw());
             }
+
+            // Render bass clef (left hand) if there are notes
+            if (leftHandNotes && leftHandNotes.length > 0) {
+                const bassStave = new VF.Stave(10, 220, 880);
+                bassStave.addClef('bass');
+                bassStave.setText('L.H.', VF.Modifier.Position.ABOVE);
+                bassStave.setContext(context).draw();
+
+                const vexNotes = convertToVexNotes(leftHandNotes);
+                const beams = VF.Beam.generateBeams(vexNotes);
+
+                const voice = new VF.Voice({ num_beats: vexNotes.length, beat_value: 8 });
+                voice.addTickables(vexNotes);
+
+                new VF.Formatter()
+                    .joinVoices([voice])
+                    .format([voice], 850);
+
+                voice.draw(context, bassStave);
+                beams.forEach(beam => beam.setContext(context).draw());
+            }
+
+            // Show note counts
+            const noteInfo = document.createElement('p');
+            noteInfo.className = 'text-muted small mt-2 mb-0';
+            noteInfo.textContent = `R.H.: ${rightHandNotes.length} notes | L.H.: ${leftHandNotes.length} notes`;
+            div.appendChild(noteInfo);
             
-            console.log('Musical notation rendered successfully');
+            console.log(`Musical notation rendered: ${rightHandNotes.length} R.H. notes, ${leftHandNotes.length} L.H. notes`);
         } catch (error) {
             console.error('Error rendering notation:', error);
             // Fallback to text display
@@ -332,7 +397,7 @@ class ScaleChallenge {
             div.innerHTML = `
                 <div class="alert alert-warning">
                     <i class="bi bi-exclamation-triangle me-2"></i>
-                    Could not render musical notation. Notes: ${notes.map(n => n.name).join(', ')}
+                    Could not render musical notation.
                 </div>
             `;
         }
