@@ -135,7 +135,7 @@ class Randomizer {
      */
     async weightedSelection(scales) {
         const weights = await Promise.all(scales.map(async (scale) => {
-            const progress = await database.getProgress(scale.id);
+            const progress = await database.getScaleProgress('default-user', scale.id);
             
             if (!progress || progress.attempts === 0) {
                 // Never practiced - high priority
