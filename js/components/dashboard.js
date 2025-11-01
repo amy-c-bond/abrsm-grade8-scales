@@ -89,7 +89,7 @@ class Dashboard {
                                 <ul class="list-unstyled mb-0">
                                     ${weakAreas.map(scale => `
                                         <li class="d-flex justify-content-between align-items-center mb-2">
-                                            <span>${scale.name}</span>
+                                            <span>${scale.displayName || scale.name}</span>
                                             <span class="badge bg-${Helpers.getAccuracyColor(scale.accuracy)}">${Math.round(scale.accuracy)}%</span>
                                         </li>
                                     `).join('')}
@@ -167,7 +167,7 @@ class Dashboard {
             <button class="list-group-item list-group-item-action scale-item" 
                     data-scale-id="${scale.id}">
                 <div class="d-flex w-100 justify-content-between align-items-center">
-                    <span>${scale.name}</span>
+                    <span>${scale.displayName || scale.name}</span>
                     <span class="badge bg-secondary">${scale.type}</span>
                 </div>
             </button>
