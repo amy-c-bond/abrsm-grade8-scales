@@ -6,7 +6,7 @@
 class Dashboard {
     constructor() {
         this.container = document.getElementById('dashboard-view');
-        this.init();
+        this.initPromise = this.init();
     }
 
     /**
@@ -15,6 +15,7 @@ class Dashboard {
     async init() {
         await this.render();
         this.attachEventListeners();
+        return this;
     }
 
     /**

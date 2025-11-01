@@ -46,14 +46,11 @@ class App {
             // Hide loading and show dashboard
             this.hideLoading();
             
-            // Give dashboard the active class initially
+            // Dashboard is now fully rendered, activate it
             const dashboardView = document.getElementById('dashboard-view');
             if (dashboardView) {
                 dashboardView.classList.add('active');
-                console.log('Dashboard view activated, has classes:', dashboardView.className);
-                console.log('Dashboard content:', dashboardView.innerHTML.substring(0, 100));
-            } else {
-                console.error('Dashboard view not found!');
+                console.log('Dashboard view activated');
             }
             
             this.currentView = 'dashboard';
@@ -71,9 +68,10 @@ class App {
      * Initialize all components
      */
     async initializeComponents() {
-        // Initialize dashboard
+        // Initialize dashboard and wait for rendering to complete
         dashboard = new Dashboard();
-        console.log('✓ Dashboard initialized');
+        await dashboard.initPromise;
+        console.log('✓ Dashboard initialized and rendered');
         
         // Initialize scale challenge
         scaleChallenge = new ScaleChallenge();
