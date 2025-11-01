@@ -37,17 +37,17 @@
 /* Dark theme - automatically applied based on system preference */
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg-primary: #212529;
-        --bg-secondary: #343a40;
-        --bg-tertiary: #495057;
+        --bg-primary: #1a1d20;
+        --bg-secondary: #2d3238;
+        --bg-tertiary: #3e4349;
         
-        --text-primary: #f8f9fa;
-        --text-secondary: #adb5bd;
-        --text-muted: #6c757d;
+        --text-primary: #ffffff;
+        --text-secondary: #e0e0e0;
+        --text-muted: #a0a0a0;
         
-        --border-color: #495057;
-        --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
-        --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+        --border-color: #4a4f56;
+        --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.5);
+        --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.6);
         --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.5);
         
         --keyboard-white-key: #f8f9fa;
@@ -73,6 +73,20 @@
     
     .navbar {
         background-color: var(--bg-secondary) !important;
+    }
+    
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+    
+    .list-group-item {
+        background-color: var(--bg-secondary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .list-group-item:hover {
+        background-color: var(--bg-tertiary);
     }
 }
 

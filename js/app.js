@@ -147,6 +147,12 @@ class App {
     hideLoading() {
         const loadingScreen = document.getElementById('loading-screen');
         loadingScreen.style.display = 'none';
+        
+        // Show app container
+        const appContainer = document.getElementById('app-container');
+        if (appContainer) {
+            appContainer.classList.remove('d-none');
+        }
     }
 
     /**
