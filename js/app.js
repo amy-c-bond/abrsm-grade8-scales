@@ -118,9 +118,12 @@ class App {
      * @param {string} viewName - View to show
      */
     showView(viewName) {
+        console.log('Switching to view:', viewName);
+        
         // Hide all views
         document.querySelectorAll('.view-container').forEach(view => {
             view.classList.remove('active');
+            console.log('Hiding view:', view.id);
         });
 
         // Update navigation
@@ -136,7 +139,10 @@ class App {
         if (view) {
             view.classList.add('active');
             this.currentView = viewName;
+            console.log('View activated:', viewName, 'classes:', view.className, 'has content:', view.innerHTML.length > 100);
             eventBus.emit(Events.VIEW_CHANGED, { view: viewName });
+        } else {
+            console.error('View not found:', `${viewName}-view`);
         }
     }
 
