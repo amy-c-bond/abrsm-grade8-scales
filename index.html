@@ -59,7 +59,34 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav ms-auto align-items-lg-center">
+                        <!-- Metronome Controls in Navbar -->
+                        <li class="nav-item me-3">
+                            <div class="d-flex align-items-center gap-2 navbar-metronome">
+                                <button id="navbar-toggle-metronome" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-music-note me-1"></i><span id="navbar-metronome-text">Metronome</span>
+                                </button>
+                                <div class="input-group input-group-sm" style="width: 110px;">
+                                    <button id="navbar-metro-tempo-down" class="btn btn-outline-secondary">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                    <input type="number" id="navbar-metro-tempo-input" class="form-control text-center" 
+                                           value="88" min="20" max="300" step="2" title="Metronome Tempo (BPM)">
+                                    <button id="navbar-metro-tempo-up" class="btn btn-outline-secondary">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                                <div class="beat-indicator-navbar d-none d-lg-flex gap-1">
+                                    <div class="beat-dot-small"></div>
+                                    <div class="beat-dot-small"></div>
+                                    <div class="beat-dot-small"></div>
+                                    <div class="beat-dot-small"></div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <div class="vr d-none d-lg-block" style="height: 30px;"></div>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link active" href="#" id="navDashboard" data-view="dashboard" aria-current="page">
                                 <i class="bi bi-house-door"></i> Dashboard

@@ -205,37 +205,6 @@ class ScaleChallenge {
                                 <div id="audio-status" class="mt-2 text-muted small"></div>
                             </div>
 
-                            <!-- Metronome -->
-                            <div class="metronome-section mt-3 pt-3 border-top">
-                                <div class="d-flex flex-wrap gap-3 align-items-center">
-                                    <button id="toggle-metronome" class="btn btn-outline-secondary">
-                                        <i class="bi bi-music-note me-2"></i><span id="metronome-button-text">Start Metronome</span>
-                                    </button>
-                                    <div class="tempo-control">
-                                        <label class="form-label mb-1 small">Metronome Tempo</label>
-                                        <div class="input-group" style="width: 150px;">
-                                            <button id="metro-tempo-down" class="btn btn-outline-secondary btn-sm">
-                                                <i class="bi bi-dash"></i>
-                                            </button>
-                                            <input type="number" id="metro-tempo-input" class="form-control form-control-sm text-center" 
-                                                   value="${scale.tempo.recommendedTempo}" min="20" max="300" step="2">
-                                            <button id="metro-tempo-up" class="btn btn-outline-secondary btn-sm">
-                                                <i class="bi bi-plus"></i>
-                                            </button>
-                                        </div>
-                                        <small class="text-muted">BPM</small>
-                                    </div>
-                                    <div class="beat-indicator ms-3">
-                                        <div id="beat-display" class="d-flex gap-2">
-                                            <div class="beat-dot"></div>
-                                            <div class="beat-dot"></div>
-                                            <div class="beat-dot"></div>
-                                            <div class="beat-dot"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                             <!-- Additional Controls -->
                             <div class="additional-controls mt-3 pt-3 border-top">
                                 <div class="d-flex flex-wrap gap-3">
@@ -727,67 +696,6 @@ class ScaleChallenge {
             });
         }
 
-        // Metronome Controls
-        const metronomeBtn = document.getElementById('toggle-metronome');
-        const metroTempoInput = document.getElementById('metro-tempo-input');
-        const metroTempoUpBtn = document.getElementById('metro-tempo-up');
-        const metroTempoDownBtn = document.getElementById('metro-tempo-down');
-        const metronomeButtonText = document.getElementById('metronome-button-text');
-
-        if (metronomeBtn) {
-            metronomeBtn.addEventListener('click', () => {
-                if (metronome.isPlaying) {
-                    metronome.stop();
-                    metronomeBtn.classList.remove('btn-secondary');
-                    metronomeBtn.classList.add('btn-outline-secondary');
-                    metronomeButtonText.textContent = 'Start Metronome';
-                    this.clearBeatIndicators();
-                } else {
-                    const tempo = parseInt(metroTempoInput.value) || this.currentScale.tempo.recommendedTempo;
-                    metronome.start(tempo, 4);
-                    metronomeBtn.classList.remove('btn-outline-secondary');
-                    metronomeBtn.classList.add('btn-secondary');
-                    metronomeButtonText.textContent = 'Stop Metronome';
-                }
-            });
-        }
-
-        if (metroTempoUpBtn && metroTempoInput) {
-            metroTempoUpBtn.addEventListener('click', () => {
-                const newTempo = Math.min(300, parseInt(metroTempoInput.value) + 2);
-                metroTempoInput.value = newTempo;
-                if (metronome.isPlaying) {
-                    metronome.setTempo(newTempo);
-                }
-            });
-        }
-
-        if (metroTempoDownBtn && metroTempoInput) {
-            metroTempoDownBtn.addEventListener('click', () => {
-                const newTempo = Math.max(20, parseInt(metroTempoInput.value) - 2);
-                metroTempoInput.value = newTempo;
-                if (metronome.isPlaying) {
-                    metronome.setTempo(newTempo);
-                }
-            });
-        }
-
-        if (metroTempoInput) {
-            metroTempoInput.addEventListener('change', () => {
-                const newTempo = Math.max(20, Math.min(300, parseInt(metroTempoInput.value)));
-                metroTempoInput.value = newTempo;
-                if (metronome.isPlaying) {
-                    metronome.setTempo(newTempo);
-                }
-            });
-        }
-
-        // Listen for metronome beats to update visual indicator
-        metronome.clearCallbacks();
-        metronome.onBeat((beatNumber, isDownbeat) => {
-            this.updateBeatIndicator(beatNumber, isDownbeat);
-        });
-
         // Show fingering button
         const fingeringBtn = document.getElementById('show-fingering');
         if (fingeringBtn) {
@@ -795,40 +703,6 @@ class ScaleChallenge {
                 Helpers.showToast('Fingering diagram feature coming in Phase 4!', 'info');
             });
         }
-    }
-
-    /**
-     * Update the visual beat indicator
-     * @param {number} beatNumber - Current beat (0-indexed)
-     * @param {boolean} isDownbeat - True if first beat of bar
-     */
-    updateBeatIndicator(beatNumber, isDownbeat) {
-        const beatDots = document.querySelectorAll('.beat-dot');
-        if (beatDots.length === 0) return;
-
-        // Clear all dots
-        beatDots.forEach(dot => {
-            dot.classList.remove('active', 'downbeat');
-        });
-
-        // Highlight current beat
-        const currentDot = beatDots[beatNumber % beatDots.length];
-        if (currentDot) {
-            currentDot.classList.add('active');
-            if (isDownbeat) {
-                currentDot.classList.add('downbeat');
-            }
-        }
-    }
-
-    /**
-     * Clear beat indicator highlights
-     */
-    clearBeatIndicators() {
-        const beatDots = document.querySelectorAll('.beat-dot');
-        beatDots.forEach(dot => {
-            dot.classList.remove('active', 'downbeat');
-        });
     }
 }
 

@@ -95,6 +95,9 @@ class App {
             });
         });
 
+        // Navbar Metronome Controls
+        this.setupNavbarMetronome();
+
         // Listen for scale selection
         eventBus.on(Events.SCALE_SELECTED, (data) => {
             console.log('Scale selected:', data);
@@ -110,6 +113,105 @@ class App {
         eventBus.on(Events.SETTINGS_CHANGED, async (data) => {
             console.log('Settings changed:', data);
             this.settings = await database.getSettings();
+        });
+    }
+
+    /**
+     * Set up navbar metronome controls
+     */
+    setupNavbarMetronome() {
+        const metronomeBtn = document.getElementById('navbar-toggle-metronome');
+        const metroTempoInput = document.getElementById('navbar-metro-tempo-input');
+        const metroTempoUpBtn = document.getElementById('navbar-metro-tempo-up');
+        const metroTempoDownBtn = document.getElementById('navbar-metro-tempo-down');
+        const metronomeText = document.getElementById('navbar-metronome-text');
+
+        if (metronomeBtn) {
+            metronomeBtn.addEventListener('click', () => {
+                if (metronome.isPlaying) {
+                    metronome.stop();
+                    metronomeBtn.classList.remove('btn-secondary');
+                    metronomeBtn.classList.add('btn-outline-secondary');
+                    metronomeText.textContent = 'Metronome';
+                    this.clearNavbarBeatIndicators();
+                } else {
+                    const tempo = parseInt(metroTempoInput.value) || 88;
+                    metronome.start(tempo, 4);
+                    metronomeBtn.classList.remove('btn-outline-secondary');
+                    metronomeBtn.classList.add('btn-secondary');
+                    metronomeText.textContent = 'Stop';
+                }
+            });
+        }
+
+        if (metroTempoUpBtn && metroTempoInput) {
+            metroTempoUpBtn.addEventListener('click', () => {
+                const newTempo = Math.min(300, parseInt(metroTempoInput.value) + 2);
+                metroTempoInput.value = newTempo;
+                if (metronome.isPlaying) {
+                    metronome.setTempo(newTempo);
+                }
+            });
+        }
+
+        if (metroTempoDownBtn && metroTempoInput) {
+            metroTempoDownBtn.addEventListener('click', () => {
+                const newTempo = Math.max(20, parseInt(metroTempoInput.value) - 2);
+                metroTempoInput.value = newTempo;
+                if (metronome.isPlaying) {
+                    metronome.setTempo(newTempo);
+                }
+            });
+        }
+
+        if (metroTempoInput) {
+            metroTempoInput.addEventListener('change', () => {
+                const newTempo = Math.max(20, Math.min(300, parseInt(metroTempoInput.value)));
+                metroTempoInput.value = newTempo;
+                if (metronome.isPlaying) {
+                    metronome.setTempo(newTempo);
+                }
+            });
+        }
+
+        // Listen for metronome beats to update visual indicator
+        metronome.clearCallbacks();
+        metronome.onBeat((beatNumber, isDownbeat) => {
+            this.updateNavbarBeatIndicator(beatNumber, isDownbeat);
+        });
+    }
+
+    /**
+     * Update the navbar beat indicator
+     * @param {number} beatNumber - Current beat (0-indexed)
+     * @param {boolean} isDownbeat - True if first beat of bar
+     */
+    updateNavbarBeatIndicator(beatNumber, isDownbeat) {
+        const beatDots = document.querySelectorAll('.beat-dot-small');
+        if (beatDots.length === 0) return;
+
+        // Clear all dots
+        beatDots.forEach(dot => {
+            dot.classList.remove('active', 'downbeat');
+        });
+
+        // Highlight current beat
+        const currentDot = beatDots[beatNumber % beatDots.length];
+        if (currentDot) {
+            currentDot.classList.add('active');
+            if (isDownbeat) {
+                currentDot.classList.add('downbeat');
+            }
+        }
+    }
+
+    /**
+     * Clear navbar beat indicator highlights
+     */
+    clearNavbarBeatIndicators() {
+        const beatDots = document.querySelectorAll('.beat-dot-small');
+        beatDots.forEach(dot => {
+            dot.classList.remove('active', 'downbeat');
         });
     }
 
