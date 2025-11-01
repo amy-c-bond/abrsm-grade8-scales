@@ -37,7 +37,12 @@ class ScaleChallenge {
      */
     async render() {
         const scale = this.currentScale;
-        const notes = MusicTheory.generateScale(scale.key, scale.category, scale.range.octaves);
+        
+        // Generate scale notes - use startNote from range which includes octave
+        const notes = MusicTheory.generateScale(scale.range.startNote, scale.category, scale.range.octaves);
+        
+        // Extract just the note names for display
+        const noteNames = notes.map(n => n.name);
         
         this.container.innerHTML = `
             <!-- Challenge Header -->
@@ -142,7 +147,7 @@ class ScaleChallenge {
                             </h5>
                             <div class="scale-notes-display p-3 bg-light rounded">
                                 <div class="d-flex flex-wrap gap-2">
-                                    ${notes.map((note, i) => `
+                                    ${noteNames.map((note, i) => `
                                         <span class="badge bg-primary fs-6 px-3 py-2">
                                             ${note}
                                             <small class="text-white-50 ms-1">${i + 1}</small>
