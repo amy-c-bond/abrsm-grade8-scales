@@ -1,61 +1,77 @@
-# ABRSM Grade 8 Piano - Technical Requirements
+# ABRSM Grade 8 Piano - Technical Requirements (2025 & 2026 Syllabus)
 
 ## Complete Syllabus Coverage
 
-This document details all technical work required for ABRSM Grade 8 Piano examinations, including scales, arpeggios, and broken chords.
+This document details all technical work required for ABRSM Grade 8 Piano examinations (2025/2026 syllabus).
+
+**Note**: All tempos are measured in minims (half notes).
+
+**Core Keys**: C, Eb, F#, A (major and minor)
 
 ---
 
 ## Scales
 
-### Major Scales
-**Keys**: All major keys (C, G, D, A, E, B, F#, C#, F, Bb, Eb, Ab, Db, Gb)
+### Major & Minor Scales (Similar Motion)
+**Keys**: C major, Eb major, F# major, A major, C minor, Eb minor, F# minor, A minor
 
 **Requirements**:
 - **Hands together** and **hands separately**
 - **4 octaves** (starting and ending on the tonic)
-- **Legato** and **staccato** (in contrary motion for hands together)
-- **Tempo**: ♩ = 120 minimum
+- **Legato** and **staccato**
+- **Tempo**: 𝅗𝅥 = 88 (minims)
+- **Minor scales**: Both harmonic and melodic required
 
 **Fingering Patterns**:
 - Standard fingerings following traditional piano technique
 - Right hand typically: 1-2-3-1-2-3-4-5 (with variations per key)
 - Left hand mirrors with appropriate crossings
 
-**Contrary Motion**:
-- Start on tonic (one octave apart)
-- Both hands move outward/inward simultaneously
-- Same requirements: 4 octaves, legato and staccato
-
-### Minor Scales (Harmonic and Melodic)
-**Keys**: All minor keys (A, E, B, F#, C#, G#, D#, D, G, C, F, Bb, Eb)
-
-**Harmonic Minor**:
-- Hands together and separately
-- 4 octaves
-- Legato and staccato
-- Tempo: ♩ = 120 minimum
-
-**Melodic Minor**:
-- Ascending melodic, descending natural minor
-- Hands together and separately
-- 4 octaves
-- Legato and staccato
-- Tempo: ♩ = 120 minimum
-
-**Contrary Motion** (both harmonic and melodic):
-- 4 octaves
-- Legato and staccato
-- Tempo: ♩ = 120 minimum
-
-### Chromatic Scales
-**Starting notes**: Any note (examiner's choice)
+### Major & Minor Scales (Contrary Motion)
+**Keys**: C major, Eb major, F# major, A major, C minor, Eb minor, F# minor, A minor
 
 **Requirements**:
-- Hands together and separately
-- 4 octaves
-- Beginning on any note
-- Tempo: ♩ = 80 minimum
+- **Hands together only**
+- **2 octaves** (not 4!)
+- Start on tonic (one octave apart)
+- Both hands move outward/inward simultaneously
+- **Legato** and **staccato**
+- **Tempo**: 𝅗𝅥 = 88 (minims)
+- **Minor scales**: Both harmonic and melodic required
+
+### Scales a Sixth Apart
+**Keys**: C major, Eb major, F# major, A major, C minor, Eb minor, F# minor, A minor
+
+**Requirements**:
+- Right hand and left hand start a sixth apart
+- **4 octaves**
+- **Tempo**: 𝅗𝅥 = 60 (minims)
+
+### Scales in Thirds
+**Keys**: Eb major only
+
+**Requirements**:
+- Both hands playing in thirds (parallel thirds)
+- **2 octaves**
+- **Legato**
+- **Tempo**: 𝅗𝅥 = 52 (minims)
+
+### Staccato Scales in Sixths
+**Keys**: C major only
+
+**Requirements**:
+- **Hands separately**
+- Playing in sixths
+- **Staccato**
+- **Tempo**: 𝅗𝅥 = 54 (minims)
+
+### Chromatic Scale
+**ONE chromatic scale only**
+
+**Requirements**:
+- Hands a sixth apart: Right hand starts on C, Left hand starts on Eb
+- **4 octaves**
+- **Tempo**: 𝅗𝅥 = 60 (minims)
 
 **Fingering**:
 - Standard chromatic fingering (1-3 or 1-2-3 patterns)
@@ -63,70 +79,47 @@ This document details all technical work required for ABRSM Grade 8 Piano examin
 - Left hand: typically 1-3-1-3-1-3-2-1-3...
 
 ### Whole-Tone Scales
-**Starting notes**: C or F# (both hands together)
+**Starting notes**: C and Eb
 
 **Requirements**:
-- Hands together
-- 2 octaves
-- Beginning on C or F#
-- Tempo: ♩ = 80 minimum
-
-**Note**: Only two whole-tone scales exist (C and F# patterns)
+- **4 octaves**
+- **Tempo**: 𝅗𝅥 = 88 (minims)
 
 ---
 
 ## Arpeggios
 
 ### Major and Minor Arpeggios
-**Keys**: All major and minor keys
+**Keys**: C major, Eb major, F# major, A major, C minor, Eb minor, F# minor, A minor
 
 **Requirements**:
 - Hands together and separately
-- 4 octaves
-- Root position only
-- Tempo: ♩ = 72 minimum
+- **4 octaves**
+- **Root position AND 2nd inversion**
+- **Tempo**: 𝅗𝅥 = 66 (minims)
 
 **Fingering**:
 - Standard arpeggio fingerings: 1-2-3-5 patterns (right hand)
 - Left hand: 5-3-2-1 patterns
+- 2nd inversion starts on the fifth of the chord
 
 ### Dominant Seventh Arpeggios
-**Keys**: In all keys (e.g., G7 in key of C, D7 in key of G, etc.)
+**Keys**: C, Eb, F#, A (e.g., C7, Eb7, F#7, A7)
 
 **Requirements**:
 - Hands together and separately
-- Root position
-- 3 octaves
-- Tempo: ♩ = 72 minimum
+- **4 octaves**
+- Root position AND 2nd inversion
+- **Tempo**: 𝅗𝅥 = 66 (minims)
 
 ### Diminished Seventh Arpeggios
-**Starting notes**: C, C#, D (three forms cover all possibilities)
+**Starting notes**: C and Eb only
 
 **Requirements**:
 - Hands together and separately
-- Root position
-- 3 octaves
-- Tempo: ♩ = 72 minimum
-
-**Note**: Only three distinct diminished seventh chords exist
-
----
-
-## Broken Chords
-
-### Major and Minor Broken Chords
-**Keys**: All major and minor keys
-
-**Requirements**:
-- Hands together and separately
-- 4 octaves
-- Root position only
-- Pattern: Root-3rd-5th-octave ascending and descending
-- Tempo: ♩ = 80 minimum
-
-**Fingering**:
-- Right hand: 1-2-3-5-3-2-1
-- Left hand: 5-3-2-1-2-3-5
+- **4 octaves**
+- Root position AND 2nd inversion
+- **Tempo**: 𝅗𝅥 = 66 (minims)
 
 ---
 
@@ -134,11 +127,14 @@ This document details all technical work required for ABRSM Grade 8 Piano examin
 
 In the Grade 8 examination, the examiner will request:
 
-1. **Scales and broken chords**: From the full range (including minors in contrary motion)
-2. **Arpeggios**: From the full range
+1. **Scales**: From the specified types in keys C, Eb, F#, A (major/minor)
+2. **Arpeggios**: From major, minor, dominant 7th, and diminished 7th in specified keys
 3. **Choice**: Candidate may be asked to play hands separately or hands together
+4. **Special scales**: Chromatic, whole-tone, scales in thirds, scales in sixths
 
 **Total marks available**: 21 marks for scales and arpeggios
+
+**Note**: Broken chords are NOT required for Grade 8 (2025/2026 syllabus)
 
 ---
 
@@ -207,19 +203,44 @@ In the Grade 8 examination, the examiner will request:
 
 ---
 
-## Summary Statistics
+## Summary Statistics (2025/2026 Syllabus)
 
-**Total Major Scales**: 15 keys × 2 types (similar motion + contrary motion) = 30 scale types
-**Total Minor Scales**: 15 keys × 4 types (harmonic similar + contrary, melodic similar + contrary) = 60 scale types
-**Total Chromatic Scales**: 12 possible starting notes
-**Total Whole-Tone Scales**: 2 patterns (C and F#)
-**Total Major/Minor Arpeggios**: 30 keys (15 major + 15 minor)
-**Total Dominant 7th Arpeggios**: 15 keys
-**Total Diminished 7th Arpeggios**: 3 forms
-**Total Broken Chords**: 30 keys (15 major + 15 minor)
+### Scales:
+- **Major/Minor scales (similar motion)**: 8 keys × 2 articulations × 2 hands options = 32 variations
+- **Major/Minor scales (contrary motion)**: 8 keys × 2 articulations = 16 variations
+- **Harmonic minor**: 4 keys × multiple options
+- **Melodic minor**: 4 keys × multiple options
+- **Scales a sixth apart**: 8 keys
+- **Scales in thirds**: 1 (Eb major only)
+- **Staccato scales in sixths**: 1 (C major only, hands separately)
+- **Chromatic scale**: 1 (sixth apart, C and Eb)
+- **Whole-tone scales**: 2 (C and Eb)
 
-**Grand Total**: Approximately 182 distinct technical elements
+### Arpeggios:
+- **Major arpeggios**: 4 keys × 2 inversions = 8
+- **Minor arpeggios**: 4 keys × 2 inversions = 8
+- **Dominant 7th arpeggios**: 4 keys × 2 inversions = 8
+- **Diminished 7th arpeggios**: 2 starting notes × 2 inversions = 4
+
+**Estimated Total**: Approximately 80-100 distinct technical elements (depending on articulation/hands combinations counted)
 
 ---
 
-*Note: This document is based on ABRSM Grade 8 Piano technical requirements. Always refer to the current official ABRSM syllabus for exam preparation.*
+## Key Changes from Previous Syllabus
+
+**2025/2026 Syllabus Changes:**
+- ✅ Focus on 4 keys only (C, Eb, F#, A) instead of all keys
+- ✅ Contrary motion scales reduced to 2 octaves (from 4)
+- ✅ Added scales a sixth apart
+- ✅ Added scales in thirds (Eb major)
+- ✅ Added staccato scales in sixths (C major)
+- ✅ Chromatic scale: ONE scale only, sixth apart (C/Eb)
+- ✅ Whole-tone scales: C and Eb, 4 octaves (not C and F#, 2 octaves)
+- ✅ Arpeggios include 2nd inversion (not just root position)
+- ✅ All tempos measured in minims (half notes)
+- ✅ Tempo changes: scales 88, arpeggios 66 (not 120/72)
+- ❌ Broken chords removed from Grade 8
+
+---
+
+*Note: This document reflects the ABRSM Grade 8 Piano technical requirements for the 2025 & 2026 syllabus. Always refer to the official ABRSM syllabus for exam preparation.*
