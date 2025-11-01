@@ -146,18 +146,9 @@ class ScaleChallenge {
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">
-                                <i class="bi bi-music-note-list text-success me-2"></i>Scale Notes
+                                <i class="bi bi-music-note-list text-success me-2"></i>Scale Notation
                             </h5>
-                            <div class="scale-notes-display p-3 bg-light rounded">
-                                <div class="d-flex flex-wrap gap-2">
-                                    ${noteNames.map((note, i) => `
-                                        <span class="badge bg-primary fs-6 px-3 py-2">
-                                            ${note}
-                                            <small class="text-white-50 ms-1">${i + 1}</small>
-                                        </span>
-                                    `).join('')}
-                                </div>
-                            </div>
+                            <div id="notation-output" class="scale-notation-display"></div>
                         </div>
                     </div>
                 </div>
@@ -246,6 +237,84 @@ class ScaleChallenge {
                 </div>
             </div>
         `;
+        
+        // Render musical notation after HTML is inserted
+        this.renderNotation(notes);
+    }
+
+    /**
+     * Render musical notation using VexFlow
+     * @param {Array} notes - Array of note objects with name, midi, frequency
+     */
+    renderNotation(notes) {
+        try {
+            const { Factory, Stave, StaveNote, Voice, Formatter, Accidental} = Vex.Flow;
+            
+            const div = document.getElementById('notation-output');
+            div.innerHTML = ''; // Clear previous content
+            
+            // Create renderer
+            const vf = new Factory({
+                renderer: { elementId: 'notation-output', width: 900, height: 200 }
+            });
+            
+            const score = vf.EasyScore();
+            const system = vf.System();
+            
+            // Convert notes to VexFlow format
+            const vexNotes = notes.map(note => {
+                // Parse note name (e.g., "C4" -> note: "C", octave: "4")
+                const match = note.name.match(/^([A-G][#b]?)(\d+)$/);
+                if (!match) return null;
+                
+                const [, noteName, octave] = match;
+                const vexNote = noteName.toLowerCase() + '/' + octave;
+                
+                return new StaveNote({
+                    keys: [vexNote],
+                    duration: 'q' // quarter note
+                });
+            }).filter(n => n !== null);
+            
+            // Add accidentals for sharps and flats
+            vexNotes.forEach((vexNote, i) => {
+                const noteName = notes[i].name.match(/^([A-G][#b]?)/)[1];
+                if (noteName.includes('#')) {
+                    vexNote.addModifier(new Accidental('#'));
+                } else if (noteName.includes('b')) {
+                    vexNote.addModifier(new Accidental('b'));
+                }
+            });
+            
+            // Split notes into multiple measures if needed (max 8 notes per measure)
+            const measuresNeeded = Math.ceil(vexNotes.length / 8);
+            
+            for (let i = 0; i < measuresNeeded; i++) {
+                const startIdx = i * 8;
+                const endIdx = Math.min((i + 1) * 8, vexNotes.length);
+                const measureNotes = vexNotes.slice(startIdx, endIdx);
+                
+                system.addStave({
+                    voices: [
+                        score.voice(measureNotes, { time: `${measureNotes.length}/4` })
+                    ]
+                }).addClef('treble');
+            }
+            
+            vf.draw();
+            
+            console.log('Musical notation rendered successfully');
+        } catch (error) {
+            console.error('Error rendering notation:', error);
+            // Fallback to text display
+            const div = document.getElementById('notation-output');
+            div.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Could not render musical notation. Notes: ${notes.map(n => n.name).join(', ')}
+                </div>
+            `;
+        }
     }
 
     /**

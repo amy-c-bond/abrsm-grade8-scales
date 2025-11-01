@@ -248,14 +248,18 @@ main {
     font-weight: 600;
 }
 
-/* Scale Notes Display */
-.scale-notes-display {
-    min-height: 80px;
+/* Scale Notation Display */
+.scale-notation-display {
+    min-height: 200px;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    overflow-x: auto;
 }
 
 @media (prefers-color-scheme: dark) {
-    .scale-notes-display {
-        background-color: var(--bg-tertiary) !important;
+    .scale-notation-display {
+        background-color: #ffffff !important; /* Keep white for music notation readability */
     }
 }
 
