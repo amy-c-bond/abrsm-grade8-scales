@@ -264,6 +264,48 @@ main {
 }
 
 /* ===================================
+   Scale List Browser
+   =================================== */
+
+.scale-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.scale-item:hover {
+    background-color: rgba(13, 110, 253, 0.08);
+    border-left-color: var(--primary-color);
+    transform: translateX(4px);
+}
+
+.scale-item:active {
+    background-color: rgba(13, 110, 253, 0.15);
+}
+
+.list-group-item-secondary {
+    font-weight: 600;
+    background-color: var(--bg-tertiary);
+    border-left: none;
+}
+
+.list-group-item-secondary:hover {
+    background-color: var(--bg-tertiary);
+    transform: none;
+    border-left: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    .scale-item:hover {
+        background-color: rgba(13, 110, 253, 0.2);
+    }
+    
+    .scale-item:active {
+        background-color: rgba(13, 110, 253, 0.3);
+    }
+}
+
+/* ===================================
    Buttons
    =================================== */
 

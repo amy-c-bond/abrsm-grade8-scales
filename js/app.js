@@ -134,6 +134,11 @@ class App {
             }
         });
 
+        // Re-render dashboard if switching to it
+        if (viewName === 'dashboard' && this.dashboard) {
+            this.dashboard.render();
+        }
+
         // Show selected view
         const view = document.getElementById(`${viewName}-view`);
         if (view) {

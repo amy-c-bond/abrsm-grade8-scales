@@ -25,7 +25,7 @@ class Dashboard {
         console.log('Dashboard rendering...');
         const stats = await progressTracker.getUserStatistics();
         const weakAreas = await progressTracker.getWeakAreas(3);
-        const allScales = await database.getAllScales();
+        const allScales = ScalesData.getAllScales();
         console.log('Dashboard data loaded:', { stats, weakAreas: weakAreas.length, scales: allScales.length });
 
         this.container.innerHTML = `
@@ -112,8 +112,13 @@ class Dashboard {
                             <div class="mb-3">
                                 <input type="text" 
                                        id="scale-search" 
-                                       class="form-control" 
+                                       class="form-control mb-2" 
                                        placeholder="Search scales...">
+                                <div class="btn-group w-100" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary filter-btn active" data-filter="all">All (${allScales.length})</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary filter-btn" data-filter="scale">Scales</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary filter-btn" data-filter="arpeggio">Arpeggios</button>
+                                </div>
                             </div>
                             <div id="scale-list" class="list-group" style="max-height: 300px; overflow-y: auto;">
                                 ${this.renderScaleList(allScales)}
@@ -166,15 +171,96 @@ class Dashboard {
      * @param {Array} scales - Scales to render
      */
     renderScaleList(scales) {
-        return scales.map(scale => `
-            <button class="list-group-item list-group-item-action scale-item" 
-                    data-scale-id="${scale.id}">
-                <div class="d-flex w-100 justify-content-between align-items-center">
-                    <span>${scale.displayName || scale.name}</span>
-                    <span class="badge bg-secondary">${scale.type}</span>
-                </div>
-            </button>
-        `).join('');
+        if (scales.length === 0) {
+            return '<div class="text-muted text-center py-3">No scales found</div>';
+        }
+
+        // Group scales by key
+        const grouped = {};
+        scales.forEach(scale => {
+            const key = scale.key || 'Other';
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(scale);
+        });
+
+        let html = '';
+        Object.keys(grouped).sort().forEach(key => {
+            html += `<div class="list-group-item list-group-item-secondary py-1 px-2"><small><strong>${key}</strong></small></div>`;
+            grouped[key].forEach(scale => {
+                const typeColor = scale.type === 'arpeggio' ? 'primary' : 'success';
+                const categoryLabel = this.getCategoryLabel(scale.category);
+                html += `
+                    <button class="list-group-item list-group-item-action scale-item py-2" 
+                            data-scale-id="${scale.id}"
+                            data-type="${scale.type}">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <div>${scale.displayName || scale.name}</div>
+                                <small class="text-muted">${categoryLabel}</small>
+                            </div>
+                            <div>
+                                <span class="badge bg-${typeColor} me-1">${scale.type}</span>
+                                <small class="text-muted">${scale.tempo.examTempo} BPM</small>
+                            </div>
+                        </div>
+                    </button>
+                `;
+            });
+        });
+        return html;
+    }
+
+    /**
+     * Get category label
+     */
+    getCategoryLabel(category) {
+        const labels = {
+            'major': 'Major',
+            'minor': 'Minor',
+            'minorHarmonic': 'Harmonic Minor',
+            'minorMelodic': 'Melodic Minor',
+            'chromatic': 'Chromatic',
+            'wholeTone': 'Whole-Tone',
+            'dominant7': 'Dominant 7th',
+            'diminished7': 'Diminished 7th'
+        };
+        return labels[category] || category;
+    }
+
+    /**
+     * Filter scales based on search and type filter
+     */
+    async filterScales() {
+        const searchInput = document.getElementById('scale-search');
+        const activeFilter = document.querySelector('.filter-btn.active');
+        const scaleList = document.getElementById('scale-list');
+        
+        if (!searchInput || !activeFilter || !scaleList) return;
+
+        const query = searchInput.value.toLowerCase();
+        const filterType = activeFilter.dataset.filter;
+        const allScales = ScalesData.getAllScales();
+
+        let filtered = allScales;
+
+        // Apply type filter
+        if (filterType !== 'all') {
+            filtered = filtered.filter(scale => scale.type === filterType);
+        }
+
+        // Apply search filter
+        if (query) {
+            filtered = filtered.filter(scale => {
+                const displayName = (scale.displayName || scale.name || '').toLowerCase();
+                const key = (scale.key || '').toLowerCase();
+                const category = (scale.category || '').toLowerCase();
+                return displayName.includes(query) || 
+                       key.includes(query) || 
+                       category.includes(query);
+            });
+        }
+
+        scaleList.innerHTML = this.renderScaleList(filtered);
     }
 
     /**
@@ -202,22 +288,23 @@ class Dashboard {
             }
         });
 
-        // Scale search
+        // Scale search and filter
         const searchInput = document.getElementById('scale-search');
         if (searchInput) {
             searchInput.addEventListener('input', Helpers.debounce(async (e) => {
-                const query = e.target.value.toLowerCase();
-                const allScales = await database.getAllScales();
-                const filtered = allScales.filter(scale => 
-                    scale.name.toLowerCase().includes(query) ||
-                    scale.type.toLowerCase().includes(query)
-                );
-                const scaleList = document.getElementById('scale-list');
-                if (scaleList) {
-                    scaleList.innerHTML = this.renderScaleList(filtered);
-                }
+                await this.filterScales();
             }, 300));
         }
+
+        // Filter buttons
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                filterButtons.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                await this.filterScales();
+            });
+        });
 
         // Listen for progress updates to refresh stats
         eventBus.on(Events.PROGRESS_UPDATED, async () => {

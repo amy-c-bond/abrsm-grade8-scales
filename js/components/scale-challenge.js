@@ -31,7 +31,6 @@ class ScaleChallenge {
         console.log('Starting challenge for:', scale.displayName);
         
         await this.render();
-        this.attachEventListeners();
         console.log('Scale challenge rendered');
     }
 
@@ -41,41 +40,93 @@ class ScaleChallenge {
     async render() {
         const scale = this.currentScale;
         
+        // Determine how many octaves to display
+        // Chromatic scales: 1 octave only
+        // Arpeggios: 2 octaves
+        // Major/Minor scales: 2 octaves
+        const displayOctaves = scale.category === 'chromatic' ? 1 : 2;
+        
         // Generate scale notes - use the correct method based on type
-        let notes;
+        let ascendingNotes;
         if (scale.type === 'arpeggio') {
             // For arpeggios, use arpeggio intervals
             const intervals = scale.category === 'major' 
                 ? MusicTheory.INTERVALS.majorArpeggio 
                 : MusicTheory.INTERVALS.minorArpeggio;
-            notes = this.generateArpeggio(scale.range.startNote, intervals, scale.range.octaves);
+            ascendingNotes = this.generateArpeggio(scale.range.startNote, intervals, displayOctaves);
         } else {
             // For scales, use generateScale
-            notes = MusicTheory.generateScale(scale.range.startNote, scale.category, scale.range.octaves);
+            ascendingNotes = MusicTheory.generateScale(scale.range.startNote, scale.category, displayOctaves);
         }
         
-        // Split notes into right hand (treble) and left hand (bass)
-        // Typically split at middle C (C4)
+        // Add descending notes (excluding the top note to avoid duplication)
+        const descendingNotes = ascendingNotes.slice(0, -1).reverse();
+        const notes = [...ascendingNotes, ...descendingNotes];
+        
+        // Define minimum starting notes for each hand
+        const F2_MIDI = 41; // F2 (minimum for left hand in bass clef)
+        const F3_MIDI = 53; // F3 (minimum for right hand in treble clef)
+        const F4_MIDI = 65; // F4
         const middleC = 60; // MIDI note for C4
-        const rightHandNotes = notes.filter(n => n.midi >= middleC);
-        const leftHandNotes = notes.filter(n => n.midi < middleC);
+        
+        let rightHandNotes, leftHandNotes;
+        
+        if (scale.handsOptions.together && !scale.handsOptions.separately) {
+            // Calculate transposition for each hand to meet minimum requirements
+            const startingNoteMidi = notes[0].midi;
+            
+            // Right hand: minimum F3 in treble clef
+            let rightHandShift = 0;
+            while (startingNoteMidi + rightHandShift < F3_MIDI) {
+                rightHandShift += 12;
+            }
+            
+            // Left hand: one octave below right hand for the actual pitch
+            let leftHandShift = rightHandShift - 12;
+            
+            // Ensure left hand doesn't go below F2
+            while (startingNoteMidi + leftHandShift < F2_MIDI) {
+                leftHandShift += 12;
+            }
+            
+            console.log('Transposition Debug:', {
+                scaleStart: scale.range.startNote,
+                startingNoteMidi,
+                rightHandShift,
+                leftHandShift,
+                firstNoteRH: startingNoteMidi + rightHandShift,
+                firstNoteLH: startingNoteMidi + leftHandShift,
+                firstNoteNameRH: MusicTheory.midiToNoteName(startingNoteMidi + rightHandShift),
+                firstNoteNameLH: MusicTheory.midiToNoteName(startingNoteMidi + leftHandShift)
+            });
+            
+            // Apply transpositions
+            rightHandNotes = notes.map(note => ({
+                name: MusicTheory.midiToNoteName(note.midi + rightHandShift, note.name.includes('b')),
+                midi: note.midi + rightHandShift,
+                frequency: MusicTheory.midiToFrequency(note.midi + rightHandShift)
+            }));
+            
+            leftHandNotes = notes.map(note => ({
+                name: MusicTheory.midiToNoteName(note.midi + leftHandShift, note.name.includes('b')),
+                midi: note.midi + leftHandShift,
+                frequency: MusicTheory.midiToFrequency(note.midi + leftHandShift)
+            }));
+        } else {
+            // Hands separately: split at middle C
+            rightHandNotes = notes.filter(n => n.midi >= middleC);
+            leftHandNotes = notes.filter(n => n.midi < middleC);
+        }
         
         this.container.innerHTML = `
             <!-- Challenge Header -->
             <div class="row mb-4">
                 <div class="col-12">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 class="mb-1">${scale.displayName}</h2>
-                            <div class="text-muted">
-                                <span class="badge bg-primary me-2">${scale.type}</span>
-                                <span class="badge bg-secondary me-2">${scale.category}</span>
-                                <span class="badge bg-info">${scale.key} ${scale.tonality}</span>
-                            </div>
-                        </div>
-                        <button id="back-to-dashboard" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
-                        </button>
+                    <h2 class="mb-1">${scale.displayName}</h2>
+                    <div class="text-muted">
+                        <span class="badge bg-primary me-2">${scale.type}</span>
+                        <span class="badge bg-secondary me-2">${scale.category}</span>
+                        <span class="badge bg-info">${scale.key} ${scale.tonality}</span>
                     </div>
                 </div>
             </div>
@@ -251,6 +302,9 @@ class ScaleChallenge {
             </div>
         `;
         
+        // Attach event listeners now that DOM is ready
+        this.attachEventListeners();
+        
         // Render musical notation after HTML is inserted
         this.renderNotation(rightHandNotes, leftHandNotes);
     }
@@ -296,19 +350,46 @@ class ScaleChallenge {
      */
     renderNotation(rightHandNotes, leftHandNotes) {
         try {
+            console.log('renderNotation input:', {
+                rightHandNotes: rightHandNotes.slice(0, 5).map(n => ({ name: n.name, midi: n.midi })),
+                leftHandNotes: leftHandNotes.slice(0, 5).map(n => ({ name: n.name, midi: n.midi })),
+                totalRH: rightHandNotes.length,
+                totalLH: leftHandNotes.length
+            });
+            
             const VF = Vex.Flow;
+            const scale = this.currentScale;
             
             const div = document.getElementById('notation-output');
             div.innerHTML = ''; // Clear previous content
             
-            // Create renderer with enough height for two staves
+            // Determine if hands are together (show grand staff) or separately (show separate staves)
+            const handsTogetherMode = scale.handsOptions.together && !scale.handsOptions.separately;
+            
+            // Calculate notes to show based on scale type (ascending + descending)
+            // Major/Minor scales: 2 octaves up + down = 15 + 15 - 1 = 29 notes
+            // Chromatic scales: 1 octave up + down = 13 + 13 - 1 = 25 notes
+            // Arpeggios: 2 octaves up + down = 9 + 9 - 1 = 17 notes
+            let notesPerDisplay;
+            if (scale.type === 'arpeggio') {
+                notesPerDisplay = 17;
+            } else if (scale.category === 'chromatic') {
+                notesPerDisplay = 25;
+            } else {
+                notesPerDisplay = 29; // major/minor scales
+            }
+            
+            // Create renderer with appropriate size
+            // Width needs to accommodate all notes (approximately 40 pixels per note)
+            const rendererWidth = Math.max(1250, notesPerDisplay * 40 + 100);
+            const rendererHeight = handsTogetherMode ? 300 : 400;
             const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-            renderer.resize(900, 400);
+            renderer.resize(rendererWidth, rendererHeight);
             const context = renderer.getContext();
             
             // Helper function to convert notes to VexFlow format
-            const convertToVexNotes = (notes, maxNotes = 16) => {
-                return notes.slice(0, maxNotes).map(note => {
+            const convertToVexNotes = (notes, maxNotes = notesPerDisplay, debugLabel = '', clef = 'treble') => {
+                const result = notes.slice(0, maxNotes).map((note, index) => {
                     // Parse note name (e.g., "C4" -> note: "C", octave: "4")
                     const match = note.name.match(/^([A-G][#b]?)(\d+)$/);
                     if (!match) return null;
@@ -325,71 +406,190 @@ class ScaleChallenge {
                         vexNoteName = noteName[0].toLowerCase();
                     }
                     
+                    const vexKey = vexNoteName + '/' + octave;
+                    if (index === 0) {
+                        console.log(`${debugLabel} First note:`, note.name, '-> VexFlow key:', vexKey, 'MIDI:', note.midi, 'Clef:', clef);
+                    }
+                    
                     const vexNote = new VF.StaveNote({
-                        keys: [vexNoteName + '/' + octave],
-                        duration: '8' // 8th note
+                        keys: [vexKey],
+                        duration: '8', // 8th note
+                        clef: clef
                     });
                     
-                    // Add accidental modifier
-                    if (hasSharp) {
-                        vexNote.addModifier(new VF.Accidental('#'), 0);
-                    } else if (hasFlat) {
-                        vexNote.addModifier(new VF.Accidental('b'), 0);
+                    // Add accidentals for:
+                    // 1. Chromatic scales (all accidentals shown)
+                    // 2. Harmonic/melodic minor (for chromatic alterations like raised 7th)
+                    if (scale.category === 'chromatic' || 
+                        scale.category === 'minorHarmonic' || 
+                        scale.category === 'minorMelodic') {
+                        if (hasSharp) {
+                            vexNote.addModifier(new VF.Accidental('#'), 0);
+                        } else if (hasFlat) {
+                            vexNote.addModifier(new VF.Accidental('b'), 0);
+                        }
                     }
                     
                     return vexNote;
                 }).filter(n => n !== null);
+                return result;
             };
 
-            // Render treble clef (right hand) if there are notes
-            if (rightHandNotes && rightHandNotes.length > 0) {
-                const trebleStave = new VF.Stave(10, 40, 880);
+            if (handsTogetherMode && rightHandNotes.length > 0 && leftHandNotes.length > 0) {
+                // GRAND STAFF MODE - Both hands together as in piano music
+                // Calculate stave width based on number of notes
+                const notesToDisplay = Math.min(rightHandNotes.length, leftHandNotes.length, notesPerDisplay);
+                // Use tighter spacing for chromatic scales to make it more compact
+                const pixelsPerNote = scale.category === 'chromatic' ? 32 : 40;
+                const staveWidth = Math.max(1100, notesToDisplay * pixelsPerNote);
+                
+                // Determine key signature (chromatic scales don't use key signatures)
+                let keySignature = null;
+                if (scale.category !== 'chromatic') {
+                    keySignature = scale.key;
+                    if (scale.tonality === 'minor') {
+                        keySignature = scale.key + 'm'; // VexFlow uses 'm' suffix for minor keys
+                    }
+                }
+                
+                const trebleStave = new VF.Stave(10, 40, staveWidth);
                 trebleStave.addClef('treble');
-                trebleStave.setText('R.H.', VF.Modifier.Position.ABOVE);
+                if (keySignature) {
+                    trebleStave.addKeySignature(keySignature);
+                }
+                trebleStave.setEndBarType(2); // Add final barline (2 = END barline)
                 trebleStave.setContext(context).draw();
 
-                const vexNotes = convertToVexNotes(rightHandNotes);
-                const beams = VF.Beam.generateBeams(vexNotes);
-
-                const voice = new VF.Voice({ num_beats: vexNotes.length, beat_value: 8 });
-                voice.addTickables(vexNotes);
-
-                new VF.Formatter()
-                    .joinVoices([voice])
-                    .format([voice], 850);
-
-                voice.draw(context, trebleStave);
-                beams.forEach(beam => beam.setContext(context).draw());
-            }
-
-            // Render bass clef (left hand) if there are notes
-            if (leftHandNotes && leftHandNotes.length > 0) {
-                const bassStave = new VF.Stave(10, 220, 880);
+                const bassStave = new VF.Stave(10, 140, staveWidth);
                 bassStave.addClef('bass');
-                bassStave.setText('L.H.', VF.Modifier.Position.ABOVE);
+                if (keySignature) {
+                    bassStave.addKeySignature(keySignature);
+                }
+                bassStave.setEndBarType(2); // Add final barline (2 = END barline)
                 bassStave.setContext(context).draw();
 
-                const vexNotes = convertToVexNotes(leftHandNotes);
-                const beams = VF.Beam.generateBeams(vexNotes);
+                // Add brace connecting the staves
+                const brace = new VF.StaveConnector(trebleStave, bassStave);
+                brace.setType(VF.StaveConnector.type.BRACE);
+                brace.setContext(context).draw();
 
-                const voice = new VF.Voice({ num_beats: vexNotes.length, beat_value: 8 });
-                voice.addTickables(vexNotes);
+                // Add line connecting the staves
+                const line = new VF.StaveConnector(trebleStave, bassStave);
+                line.setType(VF.StaveConnector.type.SINGLE_LEFT);
+                line.setContext(context).draw();
 
+                // Convert notes - ensure both hands have same number of notes
+                const trebleVexNotes = convertToVexNotes(rightHandNotes, notesPerDisplay, 'Treble', 'treble');
+                const bassVexNotes = convertToVexNotes(leftHandNotes, notesPerDisplay, 'Bass', 'bass');
+                
+                // Make sure both voices have the same number of notes
+                const maxNotes = Math.min(trebleVexNotes.length, bassVexNotes.length);
+                const trebleNotesToUse = trebleVexNotes.slice(0, maxNotes);
+                const bassNotesToUse = bassVexNotes.slice(0, maxNotes);
+
+                // Create voices with matching tick durations
+                const trebleVoice = new VF.Voice({ num_beats: maxNotes, beat_value: 8 });
+                trebleVoice.setStrict(false); // Allow flexibility in voice timing
+                trebleVoice.addTickables(trebleNotesToUse);
+
+                const bassVoice = new VF.Voice({ num_beats: maxNotes, beat_value: 8 });
+                bassVoice.setStrict(false); // Allow flexibility in voice timing
+                bassVoice.addTickables(bassNotesToUse);
+
+                // Generate beams BEFORE drawing voices
+                const trebleBeams = VF.Beam.generateBeams(trebleNotesToUse);
+                const bassBeams = VF.Beam.generateBeams(bassNotesToUse);
+
+                // Format and draw - calculate available width with tighter spacing
+                const formatterWidth = staveWidth - 30; // Account for clef and margins
                 new VF.Formatter()
-                    .joinVoices([voice])
-                    .format([voice], 850);
+                    .joinVoices([trebleVoice, bassVoice])
+                    .format([trebleVoice, bassVoice], formatterWidth);
 
-                voice.draw(context, bassStave);
-                beams.forEach(beam => beam.setContext(context).draw());
+                // Draw voices
+                trebleVoice.draw(context, trebleStave);
+                bassVoice.draw(context, bassStave);
+
+                // Draw beams after voices
+                trebleBeams.forEach(beam => beam.setContext(context).draw());
+                bassBeams.forEach(beam => beam.setContext(context).draw());
+
+            } else {
+                // SEPARATE STAVES MODE - Hands shown separately
+                const notesToDisplay = notesPerDisplay;
+                const staveWidth = Math.max(1200, notesToDisplay * 40);
+                
+                // Determine key signature (chromatic scales don't use key signatures)
+                let keySignature = null;
+                if (scale.category !== 'chromatic') {
+                    keySignature = scale.key;
+                    if (scale.tonality === 'minor') {
+                        keySignature = scale.key + 'm';
+                    }
+                }
+                
+                // Render treble clef (right hand) if there are notes
+                if (rightHandNotes && rightHandNotes.length > 0) {
+                    const trebleStave = new VF.Stave(10, 40, staveWidth);
+                    trebleStave.addClef('treble');
+                    if (keySignature) {
+                        trebleStave.addKeySignature(keySignature);
+                    }
+                    trebleStave.setText('R.H.', VF.Modifier.Position.ABOVE);
+                    trebleStave.setEndBarType(2); // Add final barline (2 = END barline)
+                    trebleStave.setContext(context).draw();
+
+                    const vexNotes = convertToVexNotes(rightHandNotes);
+                    const beams = VF.Beam.generateBeams(vexNotes);
+
+                    const voice = new VF.Voice({ num_beats: vexNotes.length, beat_value: 8 });
+                    voice.setStrict(false);
+                    voice.addTickables(vexNotes);
+
+                    new VF.Formatter()
+                        .joinVoices([voice])
+                        .format([voice], staveWidth - 30);
+
+                    voice.draw(context, trebleStave);
+                    beams.forEach(beam => beam.setContext(context).draw());
+                }
+
+                // Render bass clef (left hand) if there are notes
+                if (leftHandNotes && leftHandNotes.length > 0) {
+                    const bassStave = new VF.Stave(10, 220, staveWidth);
+                    bassStave.addClef('bass');
+                    if (keySignature) {
+                        bassStave.addKeySignature(keySignature);
+                    }
+                    bassStave.setText('L.H.', VF.Modifier.Position.ABOVE);
+                    bassStave.setEndBarType(2); // Add final barline (2 = END barline)
+                    bassStave.setContext(context).draw();
+
+                    const vexNotes = convertToVexNotes(leftHandNotes);
+                    const beams = VF.Beam.generateBeams(vexNotes);
+
+                    const voice = new VF.Voice({ num_beats: vexNotes.length, beat_value: 8 });
+                    voice.setStrict(false);
+                    voice.addTickables(vexNotes);
+
+                    new VF.Formatter()
+                        .joinVoices([voice])
+                        .format([voice], staveWidth - 30);
+
+                    voice.draw(context, bassStave);
+                    beams.forEach(beam => beam.setContext(context).draw());
+                }
             }
 
             // Show note counts
             const noteInfo = document.createElement('p');
             noteInfo.className = 'text-muted small mt-2 mb-0';
-            noteInfo.textContent = `R.H.: ${rightHandNotes.length} notes | L.H.: ${leftHandNotes.length} notes`;
+            const displayMode = handsTogetherMode ? 'Grand Staff (Hands Together)' : 'Separate Staves';
+            const octaveText = scale.category === 'chromatic' ? '1 octave' : '2 octaves';
+            noteInfo.textContent = `${displayMode} - Showing ${octaveText} (ascending + descending) | R.H.: ${Math.min(rightHandNotes.length, notesPerDisplay)} notes | L.H.: ${Math.min(leftHandNotes.length, notesPerDisplay)} notes`;
             div.appendChild(noteInfo);
             
-            console.log(`Musical notation rendered: ${rightHandNotes.length} R.H. notes, ${leftHandNotes.length} L.H. notes`);
+            console.log(`Musical notation rendered: ${rightHandNotes.length} R.H. notes, ${leftHandNotes.length} L.H. notes (${displayMode})`);
         } catch (error) {
             console.error('Error rendering notation:', error);
             // Fallback to text display
@@ -407,14 +607,6 @@ class ScaleChallenge {
      * Attach event listeners
      */
     attachEventListeners() {
-        // Back button
-        const backBtn = document.getElementById('back-to-dashboard');
-        if (backBtn) {
-            backBtn.addEventListener('click', () => {
-                app.showView('dashboard');
-            });
-        }
-
         // Show fingering button
         const fingeringBtn = document.getElementById('show-fingering');
         if (fingeringBtn) {
