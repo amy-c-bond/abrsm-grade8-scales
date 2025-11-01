@@ -1,0 +1,598 @@
+/* ===================================
+   ABRSM Grade 8 Piano Scales App
+   Main Stylesheet
+   =================================== */
+
+/* ===================================
+   CSS Custom Properties (Variables)
+   =================================== */
+
+:root {
+    /* Light theme colors (default) */
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --text-muted: #adb5bd;
+    
+    --border-color: #dee2e6;
+    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    
+    --keyboard-white-key: #ffffff;
+    --keyboard-black-key: #212529;
+    --keyboard-active: #0d6efd;
+}
+
+/* Dark theme - automatically applied based on system preference */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-primary: #212529;
+        --bg-secondary: #343a40;
+        --bg-tertiary: #495057;
+        
+        --text-primary: #f8f9fa;
+        --text-secondary: #adb5bd;
+        --text-muted: #6c757d;
+        
+        --border-color: #495057;
+        --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+        --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+        
+        --keyboard-white-key: #f8f9fa;
+        --keyboard-black-key: #343a40;
+        --keyboard-active: #0d6efd;
+    }
+    
+    /* Override Bootstrap dark mode styles */
+    body {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+    }
+    
+    .bg-body-tertiary {
+        background-color: var(--bg-secondary) !important;
+    }
+    
+    .card {
+        background-color: var(--bg-secondary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .navbar {
+        background-color: var(--bg-secondary) !important;
+    }
+}
+
+/* ===================================
+   Global Styles
+   =================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* ===================================
+   Accessibility
+   =================================== */
+
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.visually-hidden-focusable:focus {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0.5rem 1rem !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    white-space: normal !important;
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    z-index: 1000;
+}
+
+/* Focus indicators */
+:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* ===================================
+   Navigation
+   =================================== */
+
+.navbar-brand {
+    font-size: 1.25rem;
+    transition: transform 0.2s ease;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+}
+
+.nav-link {
+    transition: color 0.2s ease;
+    border-radius: 0.375rem;
+    margin: 0 0.25rem;
+}
+
+.nav-link:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.nav-link.active {
+    font-weight: 600;
+}
+
+/* ===================================
+   Loading Screen
+   =================================== */
+
+#loading-screen {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===================================
+   View Containers
+   =================================== */
+
+.view-container {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===================================
+   Cards and Components
+   =================================== */
+
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 0.5rem;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.card-header {
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+}
+
+/* ===================================
+   Buttons
+   =================================== */
+
+.btn {
+    transition: all 0.2s ease;
+    border-radius: 0.375rem;
+    font-weight: 500;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.125rem;
+}
+
+/* Random Scale Button - Hero Style */
+.btn-random-scale {
+    min-width: 280px;
+    padding: 1.25rem 2rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-md);
+}
+
+.btn-random-scale:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-lg);
+}
+
+/* ===================================
+   Progress Indicators
+   =================================== */
+
+.progress {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-color: var(--bg-tertiary);
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* ===================================
+   Badges and Pills
+   =================================== */
+
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* ===================================
+   Forms and Inputs
+   =================================== */
+
+.form-control,
+.form-select {
+    border-radius: 0.375rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Custom range slider */
+.form-range {
+    height: 0.5rem;
+}
+
+.form-range::-webkit-slider-thumb {
+    background-color: var(--primary-color);
+}
+
+.form-range::-moz-range-thumb {
+    background-color: var(--primary-color);
+}
+
+/* ===================================
+   Metronome Pulse Animation
+   =================================== */
+
+.metronome-pulse {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    display: inline-block;
+    position: relative;
+}
+
+.metronome-pulse.active {
+    animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ===================================
+   Virtual Keyboard
+   =================================== */
+
+.virtual-keyboard {
+    background-color: var(--bg-tertiary);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+}
+
+.piano-key {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+.piano-key.white {
+    width: 40px;
+    height: 160px;
+    background-color: var(--keyboard-white-key);
+    border: 1px solid var(--border-color);
+    margin-right: -1px;
+}
+
+.piano-key.black {
+    width: 24px;
+    height: 100px;
+    background-color: var(--keyboard-black-key);
+    border: 1px solid #000;
+    position: absolute;
+    z-index: 2;
+    margin-left: -12px;
+}
+
+.piano-key.active {
+    background-color: var(--keyboard-active);
+    transform: translateY(2px);
+}
+
+.piano-key.white:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.piano-key.black:hover {
+    background-color: #495057;
+}
+
+/* ===================================
+   Fingering Diagram
+   =================================== */
+
+.fingering-diagram {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.fingering-number {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin: 0 2px;
+}
+
+/* ===================================
+   Statistics Cards
+   =================================== */
+
+.stat-card {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ===================================
+   Practice Session Item
+   =================================== */
+
+.practice-item {
+    padding: 0.75rem;
+    border-left: 3px solid var(--border-color);
+    margin-bottom: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: var(--bg-secondary);
+    transition: all 0.2s ease;
+}
+
+.practice-item:hover {
+    border-left-color: var(--primary-color);
+    background-color: var(--bg-tertiary);
+}
+
+.practice-item.excellent {
+    border-left-color: var(--success-color);
+}
+
+.practice-item.good {
+    border-left-color: var(--info-color);
+}
+
+.practice-item.needs-work {
+    border-left-color: var(--warning-color);
+}
+
+/* ===================================
+   Tooltips
+   =================================== */
+
+.tooltip-inner {
+    max-width: 300px;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+}
+
+/* ===================================
+   Footer
+   =================================== */
+
+footer {
+    margin-top: auto;
+    border-top: 1px solid var(--border-color);
+}
+
+footer a {
+    transition: color 0.2s ease;
+}
+
+footer a:hover {
+    color: var(--primary-color) !important;
+}
+
+/* ===================================
+   Responsive Utilities
+   =================================== */
+
+@media (max-width: 768px) {
+    .btn-random-scale {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+    }
+    
+    .piano-key.white {
+        width: 30px;
+        height: 120px;
+    }
+    
+    .piano-key.black {
+        width: 18px;
+        height: 75px;
+        margin-left: -9px;
+    }
+}
+
+/* ===================================
+   Print Styles
+   =================================== */
+
+@media print {
+    .navbar,
+    footer,
+    .btn,
+    #toast-container {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #000;
+        page-break-inside: avoid;
+    }
+}
+
+/* ===================================
+   Animations
+   =================================== */
+
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.animate-slide-right {
+    animation: slideInFromRight 0.3s ease-out;
+}
+
+.animate-slide-left {
+    animation: slideInFromLeft 0.3s ease-out;
+}
+
+/* ===================================
+   Utility Classes
+   =================================== */
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.shadow-custom {
+    box-shadow: var(--shadow-md);
+}
+
+.border-custom {
+    border: 1px solid var(--border-color);
+}
+
+.rounded-custom {
+    border-radius: 0.5rem;
+}

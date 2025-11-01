@@ -1,0 +1,36 @@
+{
+  "name": "ABRSM Grade 8 Piano Scales",
+  "short_name": "Grade 8 Scales",
+  "description": "Interactive practice tool for ABRSM Grade 8 piano scales, arpeggios, and broken chords",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎹</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "music"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Random Scale",
+      "short_name": "Random",
+      "description": "Generate a random scale challenge",
+      "url": "/#random",
+      "icons": []
+    },
+    {
+      "name": "Progress",
+      "short_name": "Progress",
+      "description": "View your practice progress",
+      "url": "/#progress",
+      "icons": []
+    }
+  ]
+}
