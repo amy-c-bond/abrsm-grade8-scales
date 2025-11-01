@@ -15,8 +15,10 @@ class ScaleChallenge {
      */
     init() {
         // Listen for scale selection events
-        eventBus.on(Events.SCALE_SELECTED, (scale) => {
-            this.start(scale);
+        eventBus.on(Events.SCALE_SELECTED, async (scale) => {
+            await this.start(scale);
+            // After rendering completes, switch to challenge view
+            app.showView('challenge');
         });
     }
 
@@ -30,6 +32,7 @@ class ScaleChallenge {
         
         await this.render();
         this.attachEventListeners();
+        console.log('Scale challenge rendered');
     }
 
     /**

@@ -98,7 +98,7 @@ class App {
         // Listen for scale selection
         eventBus.on(Events.SCALE_SELECTED, (data) => {
             console.log('Scale selected:', data);
-            this.showView('challenge');
+            // View switching now handled by ScaleChallenge component after rendering
         });
 
         // Listen for progress updates

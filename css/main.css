@@ -215,8 +215,6 @@ main {
 .view-container.active {
     display: block;
     animation: fadeIn 0.3s ease-in;
-    background-color: red !important; /* DEBUG - should be visible */
-    min-height: 100px;
 }
 
 @keyframes fadeIn {
