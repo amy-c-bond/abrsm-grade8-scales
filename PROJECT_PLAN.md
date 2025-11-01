@@ -38,7 +38,7 @@ A single-page HTML application designed to help ABRSM Grade 8 pianists practice 
   - Integrate Bootstrap 5 framework
   - Set up responsive grid system
   - Create basic navigation structure
-  - Implement dark/light theme toggle
+  - Implement automatic theme detection (respects user's OS/browser preference)
 
 ### 2.2 Scales Database Implementation
 - **Objective**: Create comprehensive scales data structure

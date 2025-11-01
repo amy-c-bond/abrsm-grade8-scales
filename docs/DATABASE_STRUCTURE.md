@@ -134,7 +134,7 @@ This document defines the data structures for storing all ABRSM Grade 8 technica
     "audioFeedback": "boolean",
     "showFingering": "boolean",
     "showKeyboard": "boolean",
-    "theme": "string (light|dark|auto)"
+    "theme": "string (auto) - automatically detects OS/browser preference"
   },
   "practice": {
     "sessionLength": "number (minutes)",

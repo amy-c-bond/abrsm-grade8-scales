@@ -303,7 +303,7 @@
 │                                                                   │
 │   Appearance                                                     │
 │   ┌───────────────────────────────────────────────────────────┐ │
-│   │  Theme: ( ) Light  (●) Auto  ( ) Dark                    │ │
+│   │  Theme: Auto (follows system preference)                 │ │
 │   │  Text Size: ( ) Small  (●) Medium  ( ) Large             │ │
 │   │  High Contrast: [ ] Enabled                              │ │
 │   └───────────────────────────────────────────────────────────┘ │
