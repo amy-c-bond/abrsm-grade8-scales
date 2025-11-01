@@ -20,6 +20,7 @@ class App {
 
             // Initialize database
             await database.init();
+            await database.populateScales();
             console.log('✓ Database initialized');
 
             // Initialize progress tracker
