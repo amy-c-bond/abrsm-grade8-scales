@@ -209,6 +209,11 @@ main {
    =================================== */
 
 .view-container {
+    display: none;
+}
+
+.view-container.active {
+    display: block;
     animation: fadeIn 0.3s ease-in;
 }
 
