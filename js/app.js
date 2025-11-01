@@ -65,6 +65,10 @@ class App {
         dashboard = new Dashboard();
         console.log('✓ Dashboard initialized');
         
+        // Initialize scale challenge
+        scaleChallenge = new ScaleChallenge();
+        console.log('✓ Scale Challenge initialized');
+        
         // Other components will be initialized as we create them
     }
 

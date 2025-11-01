@@ -243,6 +243,17 @@ main {
     font-weight: 600;
 }
 
+/* Scale Notes Display */
+.scale-notes-display {
+    min-height: 80px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .scale-notes-display {
+        background-color: var(--bg-tertiary) !important;
+    }
+}
+
 /* ===================================
    Buttons
    =================================== */
