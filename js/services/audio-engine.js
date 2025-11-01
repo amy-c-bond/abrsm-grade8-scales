@@ -179,10 +179,16 @@ class AudioEngine {
         const noteDuration = MusicTheory.noteDuration(quarterNoteBPM, 'eighth');
         const noteGap = 0.05; // Small gap between notes for clarity
         
-        // Play notes sequentially
+        // Create descending notes (reverse of ascending, excluding duplicate top note)
+        const descendingNotes = [...notes].reverse().slice(1);
+        
+        // Combine ascending and descending for full scale
+        const allNotes = [...notes, ...descendingNotes];
+        
+        // Play notes sequentially (ascending then descending)
         const playPromise = (async () => {
-            for (let i = 0; i < notes.length && !isStopped; i++) {
-                const note = notes[i];
+            for (let i = 0; i < allNotes.length && !isStopped; i++) {
+                const note = allNotes[i];
                 
                 // Callback for visual feedback
                 if (onNotePlay) {
@@ -193,7 +199,7 @@ class AudioEngine {
                 await this.playNote(note.frequency, noteDuration, 0.6);
                 
                 // Small gap between notes
-                if (i < notes.length - 1 && !isStopped) {
+                if (i < allNotes.length - 1 && !isStopped) {
                     await new Promise(resolve => setTimeout(resolve, noteGap * 1000));
                 }
             }
