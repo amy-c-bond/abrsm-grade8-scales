@@ -146,7 +146,7 @@ class Metronome {
             oscillator.type = 'sine';
             oscillator.frequency.value = isDownbeat ? 1000 : 800;
             
-            gain.gain.value = 0.6; // Uniform volume for all beats
+            gain.gain.value = 1.0; // Doubled from 0.6 to 1.0 (maximum safe volume)
             gain.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
             
             oscillator.connect(gain);
