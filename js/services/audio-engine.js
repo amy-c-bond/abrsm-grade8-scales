@@ -1,13 +1,16 @@
 /**
  * Audio Engine
  * Handles Web Audio API for sound generation and playback
- * (Placeholder for Phase 3)
+ * Phase 3.2 - Full Implementation
  */
 
 class AudioEngine {
     constructor() {
         this.audioContext = null;
         this.isInitialized = false;
+        this.masterGain = null;
+        this.activeNotes = new Map();
+        this.stopCallbacks = [];
     }
 
     /**
@@ -16,31 +19,279 @@ class AudioEngine {
     async init() {
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Create master gain node for volume control
+            this.masterGain = this.audioContext.createGain();
+            this.masterGain.gain.value = 0.3; // Default volume at 30%
+            this.masterGain.connect(this.audioContext.destination);
+            
             this.isInitialized = true;
             console.log('Audio Engine initialized');
+            return true;
         } catch (error) {
             console.error('Audio initialization failed:', error);
+            return false;
         }
     }
 
     /**
-     * Play a note (placeholder)
+     * Resume audio context (required for user gesture on some browsers)
      */
-    async playNote(frequency, duration) {
+    async resume() {
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            await this.audioContext.resume();
+        }
+    }
+
+    /**
+     * Set master volume
+     * @param {number} volume - Volume level (0.0 to 1.0)
+     */
+    setVolume(volume) {
+        if (this.masterGain) {
+            this.masterGain.gain.value = Math.max(0, Math.min(1, volume));
+        }
+    }
+
+    /**
+     * Play a single note with piano-like characteristics
+     * @param {number} frequency - Frequency in Hz
+     * @param {number} duration - Duration in seconds
+     * @param {number} velocity - Note velocity (0.0 to 1.0)
+     * @returns {Promise} Resolves when note finishes
+     */
+    async playNote(frequency, duration, velocity = 0.7) {
         if (!this.isInitialized) {
-            console.warn('Audio not initialized');
-            return;
+            await this.init();
         }
-        // Implementation in Phase 3
-        console.log(`Playing note: ${frequency}Hz for ${duration}s`);
+
+        await this.resume();
+
+        const now = this.audioContext.currentTime;
+        
+        // Create oscillators for piano-like timbre (fundamental + harmonics)
+        const oscillator1 = this.audioContext.createOscillator();
+        const oscillator2 = this.audioContext.createOscillator();
+        const oscillator3 = this.audioContext.createOscillator();
+        
+        oscillator1.type = 'sine';
+        oscillator2.type = 'sine';
+        oscillator3.type = 'triangle';
+        
+        oscillator1.frequency.value = frequency;
+        oscillator2.frequency.value = frequency * 2; // First harmonic
+        oscillator3.frequency.value = frequency * 3; // Second harmonic
+        
+        // Create gain nodes for each oscillator
+        const gain1 = this.audioContext.createGain();
+        const gain2 = this.audioContext.createGain();
+        const gain3 = this.audioContext.createGain();
+        
+        // Mix harmonics for piano-like sound
+        gain1.gain.value = 0.5 * velocity;
+        gain2.gain.value = 0.15 * velocity;
+        gain3.gain.value = 0.08 * velocity;
+        
+        // Create envelope gain for ADSR
+        const envelopeGain = this.audioContext.createGain();
+        envelopeGain.gain.value = 0;
+        
+        // ADSR envelope
+        const attackTime = 0.01;
+        const decayTime = 0.1;
+        const sustainLevel = 0.7;
+        const releaseTime = 0.3;
+        
+        // Attack
+        envelopeGain.gain.setValueAtTime(0, now);
+        envelopeGain.gain.linearRampToValueAtTime(1, now + attackTime);
+        
+        // Decay to sustain
+        envelopeGain.gain.linearRampToValueAtTime(sustainLevel, now + attackTime + decayTime);
+        
+        // Sustain (hold at sustainLevel)
+        const releaseStart = now + duration - releaseTime;
+        envelopeGain.gain.setValueAtTime(sustainLevel, releaseStart);
+        
+        // Release
+        envelopeGain.gain.linearRampToValueAtTime(0, releaseStart + releaseTime);
+        
+        // Connect audio graph
+        oscillator1.connect(gain1);
+        oscillator2.connect(gain2);
+        oscillator3.connect(gain3);
+        
+        gain1.connect(envelopeGain);
+        gain2.connect(envelopeGain);
+        gain3.connect(envelopeGain);
+        
+        envelopeGain.connect(this.masterGain);
+        
+        // Start and stop oscillators
+        oscillator1.start(now);
+        oscillator2.start(now);
+        oscillator3.start(now);
+        
+        oscillator1.stop(now + duration);
+        oscillator2.stop(now + duration);
+        oscillator3.stop(now + duration);
+        
+        // Return promise that resolves when note completes
+        return new Promise(resolve => {
+            setTimeout(() => resolve(), duration * 1000);
+        });
     }
 
     /**
-     * Play scale (placeholder)
+     * Play a scale with proper timing
+     * @param {Object} scale - Scale object from ScalesData
+     * @param {number} tempo - BPM (beats per minute)
+     * @param {Function} onNotePlay - Callback for each note (receives note index)
+     * @returns {Promise} Resolves when scale completes, returns stop function
      */
-    async playScale(scale, tempo) {
-        console.log(`Playing scale: ${scale.displayName} at ${tempo} BPM`);
-        // Implementation in Phase 3
+    async playScale(scale, tempo, onNotePlay = null) {
+        if (!this.isInitialized) {
+            await this.init();
+        }
+
+        await this.resume();
+
+        let isStopped = false;
+        
+        // Generate scale notes using MusicTheory
+        const rootNote = scale.key + '4'; // Start at octave 4
+        const scaleType = this.getScaleTypeForGeneration(scale);
+        const octaves = scale.range?.octaves || 2;
+        
+        let notes;
+        try {
+            notes = MusicTheory.generateScale(rootNote, scaleType, octaves);
+        } catch (error) {
+            console.error('Error generating scale:', error);
+            return { stop: () => {} };
+        }
+
+        // Calculate note duration based on tempo
+        // For scales, we typically use quarter notes or eighth notes
+        const noteDuration = MusicTheory.noteDuration(tempo, 'eighth');
+        const noteGap = 0.05; // Small gap between notes for clarity
+        
+        // Play notes sequentially
+        const playPromise = (async () => {
+            for (let i = 0; i < notes.length && !isStopped; i++) {
+                const note = notes[i];
+                
+                // Callback for visual feedback
+                if (onNotePlay) {
+                    onNotePlay(i, note);
+                }
+                
+                // Play the note
+                await this.playNote(note.frequency, noteDuration, 0.6);
+                
+                // Small gap between notes
+                if (i < notes.length - 1 && !isStopped) {
+                    await new Promise(resolve => setTimeout(resolve, noteGap * 1000));
+                }
+            }
+        })();
+
+        // Return object with stop function
+        return {
+            stop: () => {
+                isStopped = true;
+            },
+            promise: playPromise
+        };
+    }
+
+    /**
+     * Stop all currently playing audio
+     */
+    stopAll() {
+        // Execute all stop callbacks
+        this.stopCallbacks.forEach(callback => callback());
+        this.stopCallbacks = [];
+        
+        // Clear active notes
+        this.activeNotes.clear();
+    }
+
+    /**
+     * Get scale type string for MusicTheory.generateScale
+     * @param {Object} scale - Scale object
+     * @returns {string} Scale type
+     */
+    getScaleTypeForGeneration(scale) {
+        const category = scale.category?.toLowerCase() || '';
+        const name = scale.name?.toLowerCase() || '';
+        
+        if (category.includes('major') && !category.includes('arpeggio')) {
+            return 'major';
+        }
+        if (category.includes('harmonic') || name.includes('harmonic')) {
+            return 'minorHarmonic';
+        }
+        if (category.includes('melodic') || name.includes('melodic')) {
+            return 'minorMelodic';
+        }
+        if (category.includes('chromatic')) {
+            return 'chromatic';
+        }
+        if (category.includes('whole') || name.includes('whole')) {
+            return 'wholeTone';
+        }
+        if (category.includes('arpeggio')) {
+            if (scale.tonality === 'major') {
+                return 'majorArpeggio';
+            } else if (scale.tonality === 'minor') {
+                return 'minorArpeggio';
+            } else if (name.includes('dominant')) {
+                return 'dominant7';
+            } else if (name.includes('diminished')) {
+                return 'diminished7';
+            }
+        }
+        
+        // Default fallback
+        return 'major';
+    }
+
+    /**
+     * Play a metronome click
+     * @param {boolean} isDownbeat - True for downbeat (first beat of bar)
+     */
+    playClick(isDownbeat = false) {
+        if (!this.isInitialized) return;
+
+        const now = this.audioContext.currentTime;
+        
+        const oscillator = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.value = isDownbeat ? 1000 : 800; // Higher pitch for downbeat
+        
+        gain.gain.value = 0.3;
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        
+        oscillator.connect(gain);
+        gain.connect(this.masterGain);
+        
+        oscillator.start(now);
+        oscillator.stop(now + 0.05);
+    }
+
+    /**
+     * Clean up resources
+     */
+    destroy() {
+        this.stopAll();
+        if (this.audioContext) {
+            this.audioContext.close();
+            this.audioContext = null;
+            this.isInitialized = false;
+        }
     }
 }
 

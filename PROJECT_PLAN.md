@@ -114,19 +114,46 @@ A single-page HTML application designed to help ABRSM Grade 8 pianists practice 
     - Filter statistics display
     - Fallback mechanisms for edge cases
 
-### 3.2 Challenge Interface 🔄 PARTIALLY COMPLETE
-- **Status**: Core challenge view complete, audio features pending
+### 3.2 Audio Features ✅ COMPLETE
+- **Status**: Full audio implementation with Web Audio API
 - **Completed Tasks**:
-  - ✅ Scale challenge presentation with full metadata display
-  - ✅ Musical notation rendering (VexFlow treble + bass clefs)
-  - ✅ Scale information cards (tempo, range, articulation, tips)
-  - ✅ Arpeggio generation with correct intervals
-  - ✅ Hand splitting at middle C for dual-clef notation
-  - ⏳ **Next**: Timer functionality for practice sessions
-  - ⏳ **Next**: Metronome with adjustable tempo (metronome.js stub created)
-  - ⏳ **Next**: Audio playback using Web Audio API
-  - ⏳ **Next**: Microphone input for performance assessment
-  - ⏳ **Next**: Real-time feedback system
+  - ✅ **AudioEngine Service** (audio-engine.js):
+    - Oscillator-based note synthesis with piano-like timbre
+    - ADSR envelope shaping (Attack, Decay, Sustain, Release)
+    - Harmonic mixing for realistic sound (fundamental + 2 harmonics)
+    - Scale playback with proper timing and note callbacks
+    - Master gain control and volume adjustment
+    - Browser audio context management and resume handling
+  - ✅ **Metronome Component** (metronome.js):
+    - Precise timing using Web Audio API scheduler
+    - Adjustable tempo (20-300 BPM)
+    - Time signature support (default 4/4)
+    - Visual beat indicators with downbeat highlighting
+    - Beat callbacks for UI synchronization
+    - Start/stop/toggle controls
+  - ✅ **Audio Player Component** (audio-player.js):
+    - Play/pause/stop controls for scale playback
+    - Tempo adjustment with live updates
+    - Event system for UI notifications
+    - Note-by-note playback callbacks for visual feedback
+    - Integration with AudioEngine service
+  - ✅ **UI Integration** (scale-challenge.js):
+    - Audio player controls in practice interface
+    - Separate metronome controls with tempo adjustment
+    - Visual beat indicator with 4 animated dots
+    - Responsive tempo controls (+/- buttons and input)
+    - Real-time status updates during playback
+  - ✅ **CSS Styling** (main.css):
+    - Audio player and metronome section styling
+    - Animated beat indicators with glow effects
+    - Responsive design for mobile devices
+    - Dark mode support for all audio controls
+    - Smooth transitions and hover effects
+  - ⏳ **Future Enhancements**:
+    - Timer functionality for practice sessions
+    - Microphone input for performance assessment
+    - Real-time feedback system with pitch detection
+    - Recording and playback of practice attempts
 
 ### 3.3 Interactive Features ⏳ NOT STARTED
 - **Status**: Planned for Phase 4 implementation

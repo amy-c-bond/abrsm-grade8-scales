@@ -179,25 +179,80 @@ class ScaleChallenge {
                             <h5 class="card-title mb-3">
                                 <i class="bi bi-play-circle text-primary me-2"></i>Practice Controls
                             </h5>
-                            <div class="d-flex flex-wrap gap-3">
-                                <button id="play-reference" class="btn btn-primary" disabled>
-                                    <i class="bi bi-play-fill me-2"></i>Play Reference
-                                </button>
-                                <button id="start-recording" class="btn btn-danger" disabled>
-                                    <i class="bi bi-record-circle me-2"></i>Record Practice
-                                </button>
-                                <button id="toggle-metronome" class="btn btn-outline-secondary" disabled>
-                                    <i class="bi bi-music-note me-2"></i>Metronome
-                                </button>
-                                <div class="vr"></div>
-                                <button id="show-fingering" class="btn btn-outline-info">
-                                    <i class="bi bi-hand-index me-2"></i>Show Fingering
-                                </button>
+                            
+                            <!-- Audio Player -->
+                            <div class="audio-player-section mb-3">
+                                <div class="d-flex flex-wrap gap-3 align-items-center">
+                                    <button id="play-reference" class="btn btn-primary">
+                                        <i class="bi bi-play-fill me-2"></i><span id="play-button-text">Play Scale</span>
+                                    </button>
+                                    <button id="stop-audio" class="btn btn-outline-danger" disabled>
+                                        <i class="bi bi-stop-fill me-2"></i>Stop
+                                    </button>
+                                    <div class="vr"></div>
+                                    <div class="tempo-control">
+                                        <label class="form-label mb-1 small">Tempo</label>
+                                        <div class="input-group" style="width: 150px;">
+                                            <button id="tempo-down" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-dash"></i>
+                                            </button>
+                                            <input type="number" id="tempo-input" class="form-control form-control-sm text-center" 
+                                                   value="${scale.tempo.recommendedTempo}" min="20" max="300" step="2">
+                                            <button id="tempo-up" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">BPM</small>
+                                    </div>
+                                </div>
+                                <div id="audio-status" class="mt-2 text-muted small"></div>
                             </div>
-                            <div class="alert alert-info mt-3 mb-0">
-                                <i class="bi bi-info-circle me-2"></i>
-                                <strong>Audio features coming in Phase 3.</strong> 
-                                For now, use this view to see scale information and notes.
+
+                            <!-- Metronome -->
+                            <div class="metronome-section mt-3 pt-3 border-top">
+                                <div class="d-flex flex-wrap gap-3 align-items-center">
+                                    <button id="toggle-metronome" class="btn btn-outline-secondary">
+                                        <i class="bi bi-music-note me-2"></i><span id="metronome-button-text">Start Metronome</span>
+                                    </button>
+                                    <div class="tempo-control">
+                                        <label class="form-label mb-1 small">Metronome Tempo</label>
+                                        <div class="input-group" style="width: 150px;">
+                                            <button id="metro-tempo-down" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-dash"></i>
+                                            </button>
+                                            <input type="number" id="metro-tempo-input" class="form-control form-control-sm text-center" 
+                                                   value="${scale.tempo.recommendedTempo}" min="20" max="300" step="2">
+                                            <button id="metro-tempo-up" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">BPM</small>
+                                    </div>
+                                    <div class="beat-indicator ms-3">
+                                        <div id="beat-display" class="d-flex gap-2">
+                                            <div class="beat-dot"></div>
+                                            <div class="beat-dot"></div>
+                                            <div class="beat-dot"></div>
+                                            <div class="beat-dot"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Controls -->
+                            <div class="additional-controls mt-3 pt-3 border-top">
+                                <div class="d-flex flex-wrap gap-3">
+                                    <button id="start-recording" class="btn btn-outline-danger" disabled>
+                                        <i class="bi bi-record-circle me-2"></i>Record Practice
+                                    </button>
+                                    <button id="show-fingering" class="btn btn-outline-info">
+                                        <i class="bi bi-hand-index me-2"></i>Show Fingering
+                                    </button>
+                                </div>
+                                <small class="text-muted mt-2 d-block">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Recording feature coming soon. Metronome and audio playback are now functional!
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -607,6 +662,150 @@ class ScaleChallenge {
      * Attach event listeners
      */
     attachEventListeners() {
+        // Audio Player Controls
+        const playBtn = document.getElementById('play-reference');
+        const stopBtn = document.getElementById('stop-audio');
+        const tempoInput = document.getElementById('tempo-input');
+        const tempoUpBtn = document.getElementById('tempo-up');
+        const tempoDownBtn = document.getElementById('tempo-down');
+        const audioStatus = document.getElementById('audio-status');
+        const playButtonText = document.getElementById('play-button-text');
+
+        if (playBtn) {
+            playBtn.addEventListener('click', async () => {
+                if (audioPlayer.isPlaying) {
+                    // Stop playback
+                    audioPlayer.stop();
+                    playBtn.classList.remove('btn-danger');
+                    playBtn.classList.add('btn-primary');
+                    playButtonText.textContent = 'Play Scale';
+                    playBtn.innerHTML = '<i class="bi bi-play-fill me-2"></i><span id="play-button-text">Play Scale</span>';
+                    stopBtn.disabled = true;
+                    if (audioStatus) audioStatus.textContent = '';
+                } else {
+                    // Start playback
+                    const tempo = parseInt(tempoInput.value) || this.currentScale.tempo.recommendedTempo;
+                    playBtn.classList.remove('btn-primary');
+                    playBtn.classList.add('btn-danger');
+                    playButtonText.textContent = 'Stop';
+                    playBtn.innerHTML = '<i class="bi bi-stop-fill me-2"></i><span id="play-button-text">Stop</span>';
+                    stopBtn.disabled = false;
+                    if (audioStatus) audioStatus.textContent = 'Playing...';
+                    
+                    await audioPlayer.play(this.currentScale, tempo);
+                    
+                    // Reset UI after playback completes
+                    playBtn.classList.remove('btn-danger');
+                    playBtn.classList.add('btn-primary');
+                    playBtn.innerHTML = '<i class="bi bi-play-fill me-2"></i><span id="play-button-text">Play Scale</span>';
+                    stopBtn.disabled = true;
+                    if (audioStatus) audioStatus.textContent = '';
+                }
+            });
+        }
+
+        if (stopBtn) {
+            stopBtn.addEventListener('click', () => {
+                audioPlayer.stop();
+                playBtn.classList.remove('btn-danger');
+                playBtn.classList.add('btn-primary');
+                playBtn.innerHTML = '<i class="bi bi-play-fill me-2"></i><span id="play-button-text">Play Scale</span>';
+                stopBtn.disabled = true;
+                if (audioStatus) audioStatus.textContent = '';
+            });
+        }
+
+        if (tempoUpBtn && tempoInput) {
+            tempoUpBtn.addEventListener('click', () => {
+                const newTempo = Math.min(300, parseInt(tempoInput.value) + 2);
+                tempoInput.value = newTempo;
+                if (audioPlayer.isPlaying) {
+                    audioPlayer.setTempo(newTempo);
+                }
+            });
+        }
+
+        if (tempoDownBtn && tempoInput) {
+            tempoDownBtn.addEventListener('click', () => {
+                const newTempo = Math.max(20, parseInt(tempoInput.value) - 2);
+                tempoInput.value = newTempo;
+                if (audioPlayer.isPlaying) {
+                    audioPlayer.setTempo(newTempo);
+                }
+            });
+        }
+
+        if (tempoInput) {
+            tempoInput.addEventListener('change', () => {
+                const newTempo = Math.max(20, Math.min(300, parseInt(tempoInput.value)));
+                tempoInput.value = newTempo;
+                if (audioPlayer.isPlaying) {
+                    audioPlayer.setTempo(newTempo);
+                }
+            });
+        }
+
+        // Metronome Controls
+        const metronomeBtn = document.getElementById('toggle-metronome');
+        const metroTempoInput = document.getElementById('metro-tempo-input');
+        const metroTempoUpBtn = document.getElementById('metro-tempo-up');
+        const metroTempoDownBtn = document.getElementById('metro-tempo-down');
+        const metronomeButtonText = document.getElementById('metronome-button-text');
+
+        if (metronomeBtn) {
+            metronomeBtn.addEventListener('click', () => {
+                if (metronome.isPlaying) {
+                    metronome.stop();
+                    metronomeBtn.classList.remove('btn-secondary');
+                    metronomeBtn.classList.add('btn-outline-secondary');
+                    metronomeButtonText.textContent = 'Start Metronome';
+                    this.clearBeatIndicators();
+                } else {
+                    const tempo = parseInt(metroTempoInput.value) || this.currentScale.tempo.recommendedTempo;
+                    metronome.start(tempo, 4);
+                    metronomeBtn.classList.remove('btn-outline-secondary');
+                    metronomeBtn.classList.add('btn-secondary');
+                    metronomeButtonText.textContent = 'Stop Metronome';
+                }
+            });
+        }
+
+        if (metroTempoUpBtn && metroTempoInput) {
+            metroTempoUpBtn.addEventListener('click', () => {
+                const newTempo = Math.min(300, parseInt(metroTempoInput.value) + 2);
+                metroTempoInput.value = newTempo;
+                if (metronome.isPlaying) {
+                    metronome.setTempo(newTempo);
+                }
+            });
+        }
+
+        if (metroTempoDownBtn && metroTempoInput) {
+            metroTempoDownBtn.addEventListener('click', () => {
+                const newTempo = Math.max(20, parseInt(metroTempoInput.value) - 2);
+                metroTempoInput.value = newTempo;
+                if (metronome.isPlaying) {
+                    metronome.setTempo(newTempo);
+                }
+            });
+        }
+
+        if (metroTempoInput) {
+            metroTempoInput.addEventListener('change', () => {
+                const newTempo = Math.max(20, Math.min(300, parseInt(metroTempoInput.value)));
+                metroTempoInput.value = newTempo;
+                if (metronome.isPlaying) {
+                    metronome.setTempo(newTempo);
+                }
+            });
+        }
+
+        // Listen for metronome beats to update visual indicator
+        metronome.clearCallbacks();
+        metronome.onBeat((beatNumber, isDownbeat) => {
+            this.updateBeatIndicator(beatNumber, isDownbeat);
+        });
+
         // Show fingering button
         const fingeringBtn = document.getElementById('show-fingering');
         if (fingeringBtn) {
@@ -614,6 +813,40 @@ class ScaleChallenge {
                 Helpers.showToast('Fingering diagram feature coming in Phase 4!', 'info');
             });
         }
+    }
+
+    /**
+     * Update the visual beat indicator
+     * @param {number} beatNumber - Current beat (0-indexed)
+     * @param {boolean} isDownbeat - True if first beat of bar
+     */
+    updateBeatIndicator(beatNumber, isDownbeat) {
+        const beatDots = document.querySelectorAll('.beat-dot');
+        if (beatDots.length === 0) return;
+
+        // Clear all dots
+        beatDots.forEach(dot => {
+            dot.classList.remove('active', 'downbeat');
+        });
+
+        // Highlight current beat
+        const currentDot = beatDots[beatNumber % beatDots.length];
+        if (currentDot) {
+            currentDot.classList.add('active');
+            if (isDownbeat) {
+                currentDot.classList.add('downbeat');
+            }
+        }
+    }
+
+    /**
+     * Clear beat indicator highlights
+     */
+    clearBeatIndicators() {
+        const beatDots = document.querySelectorAll('.beat-dot');
+        beatDots.forEach(dot => {
+            dot.classList.remove('active', 'downbeat');
+        });
     }
 }
 
