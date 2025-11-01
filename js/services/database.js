@@ -6,7 +6,7 @@
 class DatabaseManager {
     constructor() {
         this.dbName = 'abrsm-grade8-scales';
-        this.version = 1;
+        this.version = 2; // Incremented to force database upgrade and scale repopulation
         this.db = null;
     }
 
@@ -77,17 +77,28 @@ class DatabaseManager {
         
         return new Promise((resolve, reject) => {
             countRequest.onsuccess = async () => {
-                if (countRequest.result === 0) {
-                    // Populate from ScalesData
-                    const scales = ScalesData.getAllScales();
+                const scales = ScalesData.getAllScales();
+                const expectedCount = scales.length; // Should be 35
+                
+                // Repopulate if database is empty OR has wrong number of scales
+                if (countRequest.result === 0 || countRequest.result !== expectedCount) {
+                    console.log(`Database has ${countRequest.result} scales, expected ${expectedCount}. Repopulating...`);
                     
-                    for (const scale of scales) {
-                        store.add(scale);
-                    }
-                    
-                    console.log(`Populated ${scales.length} scales into database`);
+                    // Clear existing scales
+                    const clearRequest = store.clear();
+                    clearRequest.onsuccess = () => {
+                        // Add all scales
+                        for (const scale of scales) {
+                            store.add(scale);
+                        }
+                        console.log(`Populated ${scales.length} scales into database`);
+                        resolve();
+                    };
+                    clearRequest.onerror = () => reject(clearRequest.error);
+                } else {
+                    console.log(`Database already has ${expectedCount} scales`);
+                    resolve();
                 }
-                resolve();
             };
 
             countRequest.onerror = () => reject(countRequest.error);

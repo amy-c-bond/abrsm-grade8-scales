@@ -410,7 +410,8 @@ class ScaleChallenge {
             
             // Helper function to convert notes to VexFlow format
             const convertToVexNotes = (notes, maxNotes = notesPerDisplay, debugLabel = '', clef = 'treble') => {
-                const result = notes.slice(0, maxNotes).map((note, index) => {
+                const notesToConvert = notes.slice(0, maxNotes);
+                const result = notesToConvert.map((note, index) => {
                     // Parse note name (e.g., "C4" -> note: "C", octave: "4")
                     const match = note.name.match(/^([A-G][#b]?)(\d+)$/);
                     if (!match) return null;
@@ -432,9 +433,13 @@ class ScaleChallenge {
                         console.log(`${debugLabel} First note:`, note.name, '-> VexFlow key:', vexKey, 'MIDI:', note.midi, 'Clef:', clef);
                     }
                     
+                    // Last note is a quarter note, all others are eighth notes
+                    const isLastNote = (index === notesToConvert.length - 1);
+                    const duration = isLastNote ? 'q' : '8';
+                    
                     const vexNote = new VF.StaveNote({
                         keys: [vexKey],
-                        duration: '8', // 8th note
+                        duration: duration, // quarter note for last note, eighth notes for others
                         clef: clef
                     });
                     
@@ -509,11 +514,13 @@ class ScaleChallenge {
                 const bassNotesToUse = bassVexNotes.slice(0, maxNotes);
 
                 // Create voices with matching tick durations
-                const trebleVoice = new VF.Voice({ num_beats: maxNotes, beat_value: 8 });
+                // Calculate total beats: (maxNotes - 1) eighth notes + 1 quarter note = (maxNotes - 1)/2 + 1/2 = maxNotes/2
+                const totalBeats = maxNotes / 2;
+                const trebleVoice = new VF.Voice({ num_beats: totalBeats, beat_value: 4 });
                 trebleVoice.setStrict(false); // Allow flexibility in voice timing
                 trebleVoice.addTickables(trebleNotesToUse);
 
-                const bassVoice = new VF.Voice({ num_beats: maxNotes, beat_value: 8 });
+                const bassVoice = new VF.Voice({ num_beats: totalBeats, beat_value: 4 });
                 bassVoice.setStrict(false); // Allow flexibility in voice timing
                 bassVoice.addTickables(bassNotesToUse);
 
@@ -563,7 +570,9 @@ class ScaleChallenge {
                     const vexNotes = convertToVexNotes(rightHandNotes);
                     const beams = VF.Beam.generateBeams(vexNotes);
 
-                    const voice = new VF.Voice({ num_beats: vexNotes.length, beat_value: 8 });
+                    // Calculate total beats: (num notes - 1) eighth notes + 1 quarter note
+                    const totalBeats = vexNotes.length / 2;
+                    const voice = new VF.Voice({ num_beats: totalBeats, beat_value: 4 });
                     voice.setStrict(false);
                     voice.addTickables(vexNotes);
 
@@ -589,7 +598,9 @@ class ScaleChallenge {
                     const vexNotes = convertToVexNotes(leftHandNotes);
                     const beams = VF.Beam.generateBeams(vexNotes);
 
-                    const voice = new VF.Voice({ num_beats: vexNotes.length, beat_value: 8 });
+                    // Calculate total beats: (num notes - 1) eighth notes + 1 quarter note
+                    const totalBeats = vexNotes.length / 2;
+                    const voice = new VF.Voice({ num_beats: totalBeats, beat_value: 4 });
                     voice.setStrict(false);
                     voice.addTickables(vexNotes);
 

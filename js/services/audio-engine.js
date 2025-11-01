@@ -143,7 +143,7 @@ class AudioEngine {
     }
 
     /**
-     * Play a scale with proper timing
+     * Play a scale with proper timing (both hands together)
      * @param {Object} scale - Scale object from ScalesData
      * @param {number} tempo - BPM (beats per minute)
      * @param {Function} onNotePlay - Callback for each note (receives note index)
@@ -159,7 +159,7 @@ class AudioEngine {
         let isStopped = false;
         
         // Generate scale notes using MusicTheory
-        const rootNote = scale.key + '2'; // Start at octave 2 (2 octaves lower than before)
+        const rootNote = scale.key + '2';
         const scaleType = this.getScaleTypeForGeneration(scale);
         const octaves = scale.range?.octaves || 2;
         
@@ -171,35 +171,82 @@ class AudioEngine {
             return { stop: () => {} };
         }
 
+        // MIDI constants
+        const F2_MIDI = 41; // F2
+        const F3_MIDI = 53; // F3
+        
+        // Calculate transposition for each hand to meet minimum requirements
+        const startingNoteMidi = notes[0].midi;
+        
+        // Right hand: minimum F3
+        let rightHandShift = 0;
+        while (startingNoteMidi + rightHandShift < F3_MIDI) {
+            rightHandShift += 12;
+        }
+        
+        // Left hand: one octave below right hand
+        let leftHandShift = rightHandShift - 12;
+        
+        // Ensure left hand doesn't go below F2
+        while (startingNoteMidi + leftHandShift < F2_MIDI) {
+            leftHandShift += 12;
+        }
+        
+        console.log('Audio playback - Hand shifts:', { rightHandShift, leftHandShift });
+        
+        // Generate right and left hand notes
+        const rightHandNotes = notes.map(note => ({
+            name: MusicTheory.midiToNoteName(note.midi + rightHandShift),
+            midi: note.midi + rightHandShift,
+            frequency: MusicTheory.midiToFrequency(note.midi + rightHandShift)
+        }));
+        
+        const leftHandNotes = notes.map(note => ({
+            name: MusicTheory.midiToNoteName(note.midi + leftHandShift),
+            midi: note.midi + leftHandShift,
+            frequency: MusicTheory.midiToFrequency(note.midi + leftHandShift)
+        }));
+
         // Tempo is in minims (half notes) per minute
         // Convert to quarter note BPM: minim BPM * 2 = quarter note BPM
-        // Then we play eighth notes, so we need to account for that
-        // For eighth notes at a given minim tempo: minim_bpm * 2 (to get quarter) * 2 (for eighths) = minim_bpm * 4
         const quarterNoteBPM = tempo * 2; // Convert minim BPM to quarter note BPM
         const noteDuration = MusicTheory.noteDuration(quarterNoteBPM, 'eighth');
         const noteGap = 0.05; // Small gap between notes for clarity
         
         // Create descending notes (reverse of ascending, excluding duplicate top note)
-        const descendingNotes = [...notes].reverse().slice(1);
+        const rightDescending = [...rightHandNotes].reverse().slice(1);
+        const leftDescending = [...leftHandNotes].reverse().slice(1);
         
         // Combine ascending and descending for full scale
-        const allNotes = [...notes, ...descendingNotes];
+        const allRightNotes = [...rightHandNotes, ...rightDescending];
+        const allLeftNotes = [...leftHandNotes, ...leftDescending];
         
-        // Play notes sequentially (ascending then descending)
+        // Calculate quarter note duration for the final note
+        const quarterNoteDuration = MusicTheory.noteDuration(quarterNoteBPM, 'quarter');
+        
+        // Play notes sequentially (ascending then descending, both hands together)
         const playPromise = (async () => {
-            for (let i = 0; i < allNotes.length && !isStopped; i++) {
-                const note = allNotes[i];
+            for (let i = 0; i < allRightNotes.length && !isStopped; i++) {
+                const rightNote = allRightNotes[i];
+                const leftNote = allLeftNotes[i];
+                const isLastNote = (i === allRightNotes.length - 1);
                 
                 // Callback for visual feedback
                 if (onNotePlay) {
-                    onNotePlay(i, note);
+                    onNotePlay(i, rightNote);
                 }
                 
-                // Play the note
-                await this.playNote(note.frequency, noteDuration, 0.6);
+                // Play both hands simultaneously - last note is a quarter note, others are eighth notes
+                const currentDuration = isLastNote ? quarterNoteDuration : noteDuration;
+                
+                // Play both notes at the same time
+                await Promise.all([
+                    this.playNote(rightNote.frequency, currentDuration, 0.5), // Slightly quieter per hand
+                    this.playNote(leftNote.frequency, currentDuration, 0.5)
+                ]);
                 
                 // Small gap between notes
-                if (i < allNotes.length - 1 && !isStopped) {
+                if (i < allRightNotes.length - 1 && !isStopped) {
                     await new Promise(resolve => setTimeout(resolve, noteGap * 1000));
                 }
             }
