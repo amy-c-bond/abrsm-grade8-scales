@@ -45,8 +45,14 @@ class App {
 
             // Hide loading and show dashboard
             this.hideLoading();
-            this.showView('dashboard');
-
+            
+            // Give dashboard the active class initially
+            const dashboardView = document.getElementById('dashboard-view');
+            if (dashboardView) {
+                dashboardView.classList.add('active');
+            }
+            
+            this.currentView = 'dashboard';
             this.initialized = true;
             eventBus.emit(Events.APP_INITIALIZED);
 
