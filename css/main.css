@@ -771,22 +771,22 @@ footer a:hover {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: rgba(108, 117, 125, 0.3);
-    border: 1.5px solid rgba(108, 117, 125, 0.5);
+    background-color: rgba(13, 110, 253, 0.2);
+    border: 1.5px solid rgba(13, 110, 253, 0.5);
     transition: all 0.1s ease;
 }
 
 .beat-dot-small.active {
-    background-color: var(--info-color);
-    border-color: var(--info-color);
-    box-shadow: 0 0 6px var(--info-color);
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px var(--primary-color);
     transform: scale(1.15);
 }
 
 .beat-dot-small.downbeat {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    box-shadow: 0 0 8px var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
     transform: scale(1.25);
 }
 

@@ -49,10 +49,17 @@ class ScaleChallenge {
         // Generate scale notes - use the correct method based on type
         let ascendingNotes;
         if (scale.type === 'arpeggio') {
-            // For arpeggios, use arpeggio intervals
-            const intervals = scale.category === 'major' 
-                ? MusicTheory.INTERVALS.majorArpeggio 
-                : MusicTheory.INTERVALS.minorArpeggio;
+            // For arpeggios, determine if it's 2nd inversion based on the scale ID
+            const is2ndInversion = scale.id.includes('2nd-inversion');
+            
+            // Select correct intervals based on category and inversion
+            let intervals;
+            if (scale.category === 'major') {
+                intervals = is2ndInversion ? MusicTheory.INTERVALS.majorArpeggio2ndInv : MusicTheory.INTERVALS.majorArpeggio;
+            } else {
+                intervals = is2ndInversion ? MusicTheory.INTERVALS.minorArpeggio2ndInv : MusicTheory.INTERVALS.minorArpeggio;
+            }
+            
             ascendingNotes = this.generateArpeggio(scale.range.startNote, intervals, displayOctaves);
         } else {
             // For scales, use generateScale
@@ -64,7 +71,7 @@ class ScaleChallenge {
         const notes = [...ascendingNotes, ...descendingNotes];
         
         // Define minimum starting notes for each hand
-        const F2_MIDI = 41; // F2 (minimum for left hand in bass clef)
+        const C2_MIDI = 36; // C2 (minimum for left hand in bass clef)
         const F3_MIDI = 53; // F3 (minimum for right hand in treble clef)
         const F4_MIDI = 65; // F4
         const middleC = 60; // MIDI note for C4
@@ -81,11 +88,12 @@ class ScaleChallenge {
                 rightHandShift += 12;
             }
             
-            // Left hand: one octave below right hand for the actual pitch
-            let leftHandShift = rightHandShift - 12;
+            // Left hand: start two octaves below right hand (typical piano range)
+            // Then adjust up only if we go below C2
+            let leftHandShift = rightHandShift - 24;
             
-            // Ensure left hand doesn't go below F2
-            while (startingNoteMidi + leftHandShift < F2_MIDI) {
+            // Ensure left hand doesn't go below C2
+            while (startingNoteMidi + leftHandShift < C2_MIDI) {
                 leftHandShift += 12;
             }
             
@@ -100,18 +108,49 @@ class ScaleChallenge {
                 firstNoteNameLH: MusicTheory.midiToNoteName(startingNoteMidi + leftHandShift)
             });
             
-            // Apply transpositions
-            rightHandNotes = notes.map(note => ({
-                name: MusicTheory.midiToNoteName(note.midi + rightHandShift, note.name.includes('b')),
-                midi: note.midi + rightHandShift,
-                frequency: MusicTheory.midiToFrequency(note.midi + rightHandShift)
-            }));
+            // Apply transpositions with key context for proper enharmonic spelling
+            const keyContext = scale.key; // Pass the key for context-aware note naming
             
-            leftHandNotes = notes.map(note => ({
-                name: MusicTheory.midiToNoteName(note.midi + leftHandShift, note.name.includes('b')),
-                midi: note.midi + leftHandShift,
-                frequency: MusicTheory.midiToFrequency(note.midi + leftHandShift)
-            }));
+            if (scale.handsOptions.contraryMotion) {
+                // CONTRARY MOTION: Hands move in opposite directions
+                // Both hands start on the SAME note (tonic), one octave apart
+                // Right hand: goes up then down
+                // Left hand: goes down then up (completely reversed)
+                
+                // Right hand plays normally
+                rightHandNotes = notes.map(note => ({
+                    name: MusicTheory.midiToNoteName(note.midi + rightHandShift, note.name.includes('b'), keyContext),
+                    midi: note.midi + rightHandShift,
+                    frequency: MusicTheory.midiToFrequency(note.midi + rightHandShift)
+                }));
+                
+                // Left hand: Start on same tonic (one octave lower), then REVERSE all notes
+                // This creates: top->bottom->top when RH does bottom->top->bottom
+                const leftStartingNote = startingNoteMidi + rightHandShift - 12; // One octave below RH
+                leftHandNotes = notes.map(note => {
+                    // Calculate relative position from the starting note
+                    const relativeShift = note.midi - startingNoteMidi;
+                    return {
+                        name: MusicTheory.midiToNoteName(leftStartingNote + relativeShift, note.name.includes('b'), keyContext),
+                        midi: leftStartingNote + relativeShift,
+                        frequency: MusicTheory.midiToFrequency(leftStartingNote + relativeShift)
+                    };
+                }).reverse();
+                
+            } else {
+                // SIMILAR MOTION: Both hands play the same direction
+                rightHandNotes = notes.map(note => ({
+                    name: MusicTheory.midiToNoteName(note.midi + rightHandShift, note.name.includes('b'), keyContext),
+                    midi: note.midi + rightHandShift,
+                    frequency: MusicTheory.midiToFrequency(note.midi + rightHandShift)
+                }));
+                
+                leftHandNotes = notes.map(note => ({
+                    name: MusicTheory.midiToNoteName(note.midi + leftHandShift, note.name.includes('b'), keyContext),
+                    midi: note.midi + leftHandShift,
+                    frequency: MusicTheory.midiToFrequency(note.midi + leftHandShift)
+                }));
+            }
         } else {
             // Hands separately: split at middle C
             rightHandNotes = notes.filter(n => n.midi >= middleC);
@@ -194,7 +233,7 @@ class ScaleChallenge {
                                                 <i class="bi bi-dash"></i>
                                             </button>
                                             <input type="number" id="tempo-input" class="form-control form-control-sm text-center" 
-                                                   value="${scale.tempo.recommendedTempo}" min="20" max="300" step="2">
+                                                   value="${scale.tempo.examTempo}" min="20" max="300" step="2">
                                             <button id="tempo-up" class="btn btn-outline-secondary btn-sm">
                                                 <i class="bi bi-plus"></i>
                                             </button>
@@ -401,8 +440,8 @@ class ScaleChallenge {
             }
             
             // Create renderer with appropriate size
-            // Width needs to accommodate all notes (approximately 40 pixels per note)
-            const rendererWidth = Math.max(1250, notesPerDisplay * 40 + 100);
+            // Width needs to accommodate stave + margins (add extra space for overflow)
+            const rendererWidth = Math.max(1500, notesPerDisplay * 40 + 300);
             const rendererHeight = handsTogetherMode ? 300 : 400;
             const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
             renderer.resize(rendererWidth, rendererHeight);
@@ -446,14 +485,26 @@ class ScaleChallenge {
                     // Add accidentals for:
                     // 1. Chromatic scales (all accidentals shown)
                     // 2. Harmonic/melodic minor (for chromatic alterations like raised 7th)
+                    // 3. Unusual notes that aren't in standard key signatures (B#, Cb, Fb)
+                    // 4. Natural notes in sharp keys (E in F# major, etc.)
+                    // Note: E# in F# major is covered by the key signature, so we don't add it
+                    const isUnusualNote = noteName === 'B#' || noteName === 'Cb' || noteName === 'Fb';
+                    
+                    // Check if this is a natural note in a sharp key that needs a natural sign
+                    const needsNaturalSign = (scale.key === 'F#' && noteName === 'E') ||
+                                           (scale.key === 'C#' && noteName === 'B');
+                    
                     if (scale.category === 'chromatic' || 
                         scale.category === 'minorHarmonic' || 
-                        scale.category === 'minorMelodic') {
+                        scale.category === 'minorMelodic' ||
+                        isUnusualNote) {
                         if (hasSharp) {
                             vexNote.addModifier(new VF.Accidental('#'), 0);
                         } else if (hasFlat) {
                             vexNote.addModifier(new VF.Accidental('b'), 0);
                         }
+                    } else if (needsNaturalSign) {
+                        vexNote.addModifier(new VF.Accidental('n'), 0);
                     }
                     
                     return vexNote;
@@ -465,9 +516,13 @@ class ScaleChallenge {
                 // GRAND STAFF MODE - Both hands together as in piano music
                 // Calculate stave width based on number of notes
                 const notesToDisplay = Math.min(rightHandNotes.length, leftHandNotes.length, notesPerDisplay);
-                // Use tighter spacing for chromatic scales to make it more compact
-                const pixelsPerNote = scale.category === 'chromatic' ? 32 : 40;
-                const staveWidth = Math.max(1100, notesToDisplay * pixelsPerNote);
+                // Use compact spacing
+                const pixelsPerNote = scale.category === 'chromatic' ? 26 : 34;
+                // VexFlow adds clef & key signature INSIDE the stave width, so we need extra space:
+                // - Clef: ~60px
+                // - Key signature (6 sharps): ~120px  
+                // - End margin & barline: ~50px
+                const staveWidth = Math.max(1300, notesToDisplay * pixelsPerNote + 230);
                 
                 // Determine key signature (chromatic scales don't use key signatures)
                 let keySignature = null;
@@ -659,7 +714,7 @@ class ScaleChallenge {
                     if (audioStatus) audioStatus.textContent = '';
                 } else {
                     // Start playback
-                    const tempo = parseInt(tempoInput.value) || this.currentScale.tempo.recommendedTempo;
+                    const tempo = parseInt(tempoInput.value) || this.currentScale.tempo.examTempo;
                     playBtn.classList.remove('btn-primary');
                     playBtn.classList.add('btn-danger');
                     playButtonText.textContent = 'Stop';

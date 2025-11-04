@@ -10,11 +10,11 @@ class MusicTheory {
     static NOTE_MAP = {
         'C': 0, 'C#': 1, 'Db': 1,
         'D': 2, 'D#': 3, 'Eb': 3,
-        'E': 4,
+        'E': 4, 'E#': 5, 'Fb': 4,
         'F': 5, 'F#': 6, 'Gb': 6,
         'G': 7, 'G#': 8, 'Ab': 8,
         'A': 9, 'A#': 10, 'Bb': 10,
-        'B': 11
+        'B': 11, 'B#': 0, 'Cb': 11
     };
 
     /**
@@ -26,6 +26,11 @@ class MusicTheory {
      * MIDI number to note name (prefer flats)
      */
     static MIDI_TO_NOTE_FLAT = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+    
+    /**
+     * MIDI number to note name for F# Major (uses E# instead of F)
+     */
+    static MIDI_TO_NOTE_F_SHARP_MAJOR = ['C', 'C#', 'D', 'D#', 'E', 'E#', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
     /**
      * Scale interval patterns (in semitones)
@@ -37,8 +42,10 @@ class MusicTheory {
         minorNatural: [2, 1, 2, 2, 1, 2, 2],
         chromatic: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         wholeTone: [2, 2, 2, 2, 2, 2],
-        majorArpeggio: [4, 3, 5],  // Root, 3rd, 5th, octave
-        minorArpeggio: [3, 4, 5],
+        majorArpeggio: [4, 3, 5],  // Root, 3rd, 5th, octave (root position)
+        majorArpeggio2ndInv: [5, 4, 3],  // 5th, root, 3rd, octave (2nd inversion)
+        minorArpeggio: [3, 4, 5],  // Root, 3rd, 5th, octave (root position)
+        minorArpeggio2ndInv: [5, 3, 4],  // 5th, root, 3rd, octave (2nd inversion)
         dominant7: [4, 3, 3, 2],  // Root, 3rd, 5th, 7th
         diminished7: [3, 3, 3, 3]
     };
@@ -76,17 +83,43 @@ class MusicTheory {
      * Convert MIDI number to note name with octave
      * @param {number} midiNote - MIDI note number
      * @param {boolean} preferFlats - Use flat notation instead of sharps
+     * @param {string} keyContext - Optional key context for special enharmonic spellings (e.g., 'F#')
      * @returns {string} Note name (e.g., 'C4')
      */
-    static midiToNoteName(midiNote, preferFlats = false) {
+    static midiToNoteName(midiNote, preferFlats = false, keyContext = null) {
         const octave = Math.floor(midiNote / 12) - 1;
         const noteIndex = midiNote % 12;
+        
+        // Special case: F# major uses E# instead of F
+        if (keyContext === 'F#' && noteIndex === 5) {
+            return `E#${octave}`;
+        }
+        
         const noteName = preferFlats ? this.MIDI_TO_NOTE_FLAT[noteIndex] : this.MIDI_TO_NOTE[noteIndex];
         return `${noteName}${octave}`;
     }
 
     /**
-     * Generate notes for a scale
+     * Correct note spellings for each major key
+     */
+    static MAJOR_SCALE_SPELLINGS = {
+        'C': ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+        'G': ['G', 'A', 'B', 'C', 'D', 'E', 'F#'],
+        'D': ['D', 'E', 'F#', 'G', 'A', 'B', 'C#'],
+        'A': ['A', 'B', 'C#', 'D', 'E', 'F#', 'G#'],
+        'E': ['E', 'F#', 'G#', 'A', 'B', 'C#', 'D#'],
+        'B': ['B', 'C#', 'D#', 'E', 'F#', 'G#', 'A#'],
+        'F#': ['F#', 'G#', 'A#', 'B', 'C#', 'D#', 'E#'],
+        'Gb': ['Gb', 'Ab', 'Bb', 'Cb', 'Db', 'Eb', 'F'],
+        'Db': ['Db', 'Eb', 'F', 'Gb', 'Ab', 'Bb', 'C'],
+        'Ab': ['Ab', 'Bb', 'C', 'Db', 'Eb', 'F', 'G'],
+        'Eb': ['Eb', 'F', 'G', 'Ab', 'Bb', 'C', 'D'],
+        'Bb': ['Bb', 'C', 'D', 'Eb', 'F', 'G', 'A'],
+        'F': ['F', 'G', 'A', 'Bb', 'C', 'D', 'E']
+    };
+
+    /**
+     * Generate notes for a scale with correct enharmonic spellings
      * @param {string} rootNote - Root note (e.g., 'C4')
      * @param {string} scaleType - Type of scale
      * @param {number} octaves - Number of octaves
@@ -100,23 +133,68 @@ class MusicTheory {
 
         const notes = [];
         let currentMidi = this.noteNameToMidi(rootNote);
-        const preferFlats = rootNote.includes('b');
+        const match = rootNote.match(/^([A-G][#b]?)(\d+)$/);
+        const [, keyName, startOctave] = match;
+        
+        // Get correct scale spellings for major scales
+        const scaleSpellings = this.MAJOR_SCALE_SPELLINGS[keyName];
+        const useCorrectSpellings = scaleSpellings && scaleType === 'major';
+
+        let degreeIndex = 0;
+        let currentOctave = parseInt(startOctave);
 
         // Generate ascending notes
         for (let octave = 0; octave < octaves; octave++) {
             for (let i = 0; i < intervals.length; i++) {
-                notes.push({
-                    name: this.midiToNoteName(currentMidi, preferFlats),
-                    midi: currentMidi,
-                    frequency: this.midiToFrequency(currentMidi)
-                });
-                currentMidi += intervals[i];
+                let noteName;
+                
+                if (useCorrectSpellings) {
+                    // Use correct enharmonic spelling
+                    const scalePosition = degreeIndex % 7;
+                    const scaleDegree = scaleSpellings[scalePosition];
+                    noteName = `${scaleDegree}${currentOctave}`;
+                    
+                    notes.push({
+                        name: noteName,
+                        midi: currentMidi,
+                        frequency: this.midiToFrequency(currentMidi)
+                    });
+                    
+                    degreeIndex++;
+                    currentMidi += intervals[i];
+                    
+                    // Increment octave when we complete a full scale (7 notes) and wrap back to degree 0
+                    // This happens when we've just added the 7th degree (index 6) and are about to add degree 0 again
+                    if (scalePosition === 6) {
+                        currentOctave++;
+                    }
+                } else {
+                    // Fall back to chromatic naming
+                    const preferFlats = rootNote.includes('b');
+                    noteName = this.midiToNoteName(currentMidi, preferFlats);
+                    
+                    notes.push({
+                        name: noteName,
+                        midi: currentMidi,
+                        frequency: this.midiToFrequency(currentMidi)
+                    });
+                    currentMidi += intervals[i];
+                }
             }
         }
         
         // Add final tonic
+        let finalNoteName;
+        if (useCorrectSpellings) {
+            const finalDegree = scaleSpellings[0]; // Back to tonic
+            finalNoteName = `${finalDegree}${currentOctave}`;
+        } else {
+            const preferFlats = rootNote.includes('b');
+            finalNoteName = this.midiToNoteName(currentMidi, preferFlats);
+        }
+        
         notes.push({
-            name: this.midiToNoteName(currentMidi, preferFlats),
+            name: finalNoteName,
             midi: currentMidi,
             frequency: this.midiToFrequency(currentMidi)
         });

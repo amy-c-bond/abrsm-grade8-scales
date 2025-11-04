@@ -20,19 +20,32 @@ A modern, interactive web application designed to help ABRSM Grade 8 pianists ma
   - VexFlow-powered grand staff notation
   - Automatic key signatures
   - Proper clef assignment (treble/bass)
+  - Quarter note ending for musical accuracy
+- **Audio Playback System**:
+  - Web Audio API with piano-like synthesis
+  - Two-hand simultaneous playback
+  - Scales play ascending then descending
+  - Adjustable tempo with exam tempo defaults
+  - ADSR envelope for realistic sound
+- **Global Metronome**:
+  - Precise timing with Web Audio scheduler
+  - Navbar integration for always-accessible practice tool
+  - Visual beat indicators with animations
+  - Adjustable tempo (20-300 BPM)
 - **Intelligent Randomizer**: Random scale selection for varied practice
 - **Progress Tracking Infrastructure**: IndexedDB backend ready for session recording
 - **Modern UI**: Clean, responsive Bootstrap 5 design with dark mode support
 - **Offline-First Architecture**: IndexedDB for data persistence
 
-### 🔄 In Development
-- **Audio Integration**: 
-  - Play reference audio for each scale
-  - Record and assess your performance with microphone input
-  - Visual and audio metronome with adjustable tempo
+### 🔄 In Development (See GitHub Issues)
+- **Scale Type Fixes** (#4): Correcting dominant 7ths, staccato in 6ths, adding scales in thirds
+- **Time Signature Support** (#6): Multiple time signatures for metronome (3/4, 2/4, 6/8, etc.)
+- **Compact Scale Cards** (#5): Expandable detail view for cleaner practice flow
+- **Next Scale Button** (#3): Quick navigation to next random scale
 - **Interactive Fingering Diagrams**: Visual guides showing proper hand positions
 - **Adaptive Learning**: Difficulty adjusts based on your performance
 - **Progress Visualization**: Charts and analytics dashboard
+- **Microphone Input**: Record and assess your performance with pitch detection
 
 ## 🚀 Getting Started
 
@@ -48,21 +61,34 @@ That's it! No build process or dependencies required - it's a simple single-page
 
 ## 🆕 Recent Updates (November 2025)
 
+### Latest Features
+- ✅ **Contrary Motion Scales**: Properly implemented with hands moving in opposite directions
+- ✅ **2nd Inversion Arpeggios**: Correct intervals starting on 5th of chord (5th→root→3rd)
+- ✅ **Enharmonic Spelling**: F# Major correctly displays E# (context-aware note names)
+- ✅ **Optimized Notation**: Stave width properly accounts for clef and key signature space
+- ✅ **Blue Metronome Theme**: Enhanced visual design with blue color scheme
+- ✅ **Extended Range**: Left hand minimum lowered to C2 for better sound
+
+### Previous Updates
+- ✅ **Audio Playback System**: Full Web Audio API implementation with piano-like synthesis
+- ✅ **Two-Hand Playback**: Simultaneous left and right hand with proper octave spacing
+- ✅ **Global Metronome**: Navbar-integrated metronome with visual beat indicators
+- ✅ **Musical Accuracy**: Scales ascend/descend with quarter note endings
+- ✅ **Tempo Controls**: Adjustable tempo defaulting to exam tempo for each scale
 - ✅ **Complete scales database**: All 35 ABRSM Grade 8 scales/arpeggios (2025/2026 syllabus)
 - ✅ **Enhanced scale browser**: Grouped by key, filterable, with improved search
 - ✅ **Key signatures**: Automatic key signature display in musical notation
 - ✅ **Improved UX**: Better hover effects, visual feedback, and dark mode support
-- ✅ **Correct arpeggio inversions**: 2nd inversion for major/minor, root for dominant/diminished 7th
-- ✅ **Accurate tempo markings**: All scales set to correct BPM per ABRSM requirements
 
 ## 📖 How to Use
 
 1. **Start Practice**: Click "Generate Random Scale" to get a challenge
-2. **View Fingering**: See the interactive fingering diagram for the selected scale
-3. **Set Tempo**: Adjust the metronome to your comfortable practice speed
-4. **Play Along**: Practice the scale on your keyboard
-5. **Record & Assess**: Use the microphone feature to record and get feedback
-6. **Track Progress**: View your improvement statistics over time
+2. **Listen to Reference**: Click the play button to hear the scale with two-hand playback
+3. **Adjust Tempo**: Use the +/- buttons to adjust tempo (defaults to exam tempo)
+4. **Use Metronome**: Toggle the global metronome in the navbar for rhythmic practice
+5. **View Notation**: Study the VexFlow musical notation with key signatures
+6. **Practice Along**: Play the scale on your piano following the audio and notation
+7. **Browse Scales**: Use the scale browser to explore specific scales by key or type
 
 ## 🛠️ Technology Stack
 
@@ -104,11 +130,13 @@ See [PROJECT_PLAN.md](PROJECT_PLAN.md) for the complete development roadmap.
 - [x] Scale browser with filtering and grouping
 - [x] Dark mode support
 
-### Phase 3: Audio & Practice 🔄 IN PROGRESS
-- [ ] Audio playback system (Web Audio API)
-- [ ] Microphone input and assessment
-- [ ] Metronome implementation
-- [x] Basic challenge interface
+### Phase 3: Audio & Practice ✅ COMPLETE
+- [x] Audio playback system (Web Audio API)
+- [x] Two-hand simultaneous playback
+- [x] Metronome with navbar integration
+- [x] Tempo controls and beat indicators
+- [x] Scale challenge interface with audio player
+- [ ] Microphone input and assessment (planned)
 
 ### Phase 4: Learning Features 🔄 IN PROGRESS
 - [x] Progress tracking infrastructure

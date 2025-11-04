@@ -71,10 +71,14 @@ A single-page HTML application designed to help ABRSM Grade 8 pianists practice 
   - ✅ **Improved hover effects** with cursor, background, border animation, and slide
   - ✅ Scale Challenge view with detailed metadata cards
   - ✅ Musical notation display with VexFlow (treble + bass clefs, key signatures)
+  - ✅ Optimized stave width calculation accounting for clef and key signature space
+  - ✅ Contrary motion scales with proper voice leading (hands in opposite directions)
+  - ✅ Context-aware enharmonic spelling (E# in F# Major, F in other keys)
+  - ✅ Blue-themed metronome controls with visual beat indicators
   - ✅ Interactive navigation and view switching
   - ✅ Toast notification system
   - ✅ Progress tracking infrastructure
-  - ✅ Component stubs for future features (metronome, audio-player, progress-view, settings)
+  - ✅ Component stubs for future features (progress-view, settings)
 
 ### 2.4 Utility & Service Layer ✅
 - **Status**: Complete - Full service architecture operational
@@ -121,35 +125,55 @@ A single-page HTML application designed to help ABRSM Grade 8 pianists practice 
     - Oscillator-based note synthesis with piano-like timbre
     - ADSR envelope shaping (Attack, Decay, Sustain, Release)
     - Harmonic mixing for realistic sound (fundamental + 2 harmonics)
-    - Scale playback with proper timing and note callbacks
+    - Two-hand simultaneous playback with proper octave spacing
+    - Scales play ascending then descending with quarter note ending
+    - Minim-based tempo conversion (88 BPM minims = 176 BPM quarters)
+    - Left hand minimum: C2 (MIDI 36), Right hand minimum: F3 (MIDI 53)
+    - Contrary motion support: left hand plays reversed note sequence
     - Master gain control and volume adjustment
     - Browser audio context management and resume handling
   - ✅ **Metronome Component** (metronome.js):
-    - Precise timing using Web Audio API scheduler
+    - Precise timing using Web Audio API scheduler (25ms lookahead)
     - Adjustable tempo (20-300 BPM)
     - Time signature support (default 4/4)
     - Visual beat indicators with downbeat highlighting
     - Beat callbacks for UI synchronization
     - Start/stop/toggle controls
+    - Volume at maximum (1.0) for clear audibility
+    - Moved to navbar toolbar for global accessibility
   - ✅ **Audio Player Component** (audio-player.js):
-    - Play/pause/stop controls for scale playback
+    - Play/pause toggle controls for scale playback
     - Tempo adjustment with live updates
     - Event system for UI notifications
     - Note-by-note playback callbacks for visual feedback
     - Integration with AudioEngine service
-  - ✅ **UI Integration** (scale-challenge.js):
+    - Tempo defaults to exam tempo for each scale
+  - ✅ **UI Integration** (scale-challenge.js, app.js):
     - Audio player controls in practice interface
-    - Separate metronome controls with tempo adjustment
+    - Navbar metronome with tempo controls and beat indicators
     - Visual beat indicator with 4 animated dots
     - Responsive tempo controls (+/- buttons and input)
     - Real-time status updates during playback
+    - Tempo input defaults to examTempo from scale data
   - ✅ **CSS Styling** (main.css):
     - Audio player and metronome section styling
-    - Animated beat indicators with glow effects
+    - Animated beat indicators with glow effects (.beat-dot, .beat-dot-small)
     - Responsive design for mobile devices
     - Dark mode support for all audio controls
     - Smooth transitions and hover effects
-  - ⏳ **Future Enhancements**:
+  - ✅ **Musical Accuracy**:
+    - Final note of scales/arpeggios is quarter note (both audio and notation)
+    - VexFlow voice timing accounts for mixed note durations
+    - Hand splitting at C2 (left) and F3 (right) minimums
+    - F# Major scale uses E# instead of F (correct enharmonic spelling)
+    - Contrary motion scales properly implemented (hands move in opposite directions)
+    - 2nd inversion arpeggios start on 5th of chord with correct intervals
+    - Database version 2 with auto-repopulation (35 scales)
+  - 📋 **Future Enhancements** (GitHub Issues Created):
+    - Issue #6: Time signature selector for metronome (3/4, 2/4, 6/8, 5/4, 7/8)
+    - Issue #3: Next scale button for continuous practice flow
+    - Issue #5: Compact scale card with expandable details
+    - Issue #4: Fix scale types (dominant 7ths, staccato in 6ths, add scales in thirds)
     - Timer functionality for practice sessions
     - Microphone input for performance assessment
     - Real-time feedback system with pitch detection
@@ -281,32 +305,38 @@ A single-page HTML application designed to help ABRSM Grade 8 pianists practice 
 
 ### ✅ Completed Features:
 - **Core Application Structure**: Full HTML5 app with Bootstrap 5.3.2 and VexFlow 4.2.2
-- **Musical Notation Display**: Dual-clef (treble + bass) notation rendering with key signatures and proper arpeggio generation
+- **Musical Notation Display**: Dual-clef (treble + bass) notation with key signatures, quarter note endings
 - **Complete ABRSM Grade 8 Database**: 35 scales/arpeggios matching 2025/2026 syllabus (C, Eb, F#, A keys)
 - **Enhanced Scale Browser**: Grouped by key, filterable (All/Scales/Arpeggios), searchable with improved hover effects
 - **Dashboard Interface**: Hero section, statistics cards, interactive scale list with tempo display, random scale selection
-- **Scale Challenge View**: Detailed metadata display with tempo, range, articulation, practice tips, common mistakes
-- **Database Infrastructure**: IndexedDB with 4 object stores (scales, progress, sessions, settings)
+- **Scale Challenge View**: Detailed metadata display with tempo, range, articulation, practice tips, audio player
+- **Audio Playback System**: Web Audio API with two-hand simultaneous playback, ascending/descending scales
+- **Global Metronome**: Navbar-integrated metronome with visual beat indicators and precise timing
+- **Tempo Controls**: Adjustable tempo with exam tempo defaults, +/- buttons, live updates
+- **Database Infrastructure**: IndexedDB version 2 with 4 object stores, auto-repopulation
 - **Progress Tracking Backend**: Statistics calculation and adaptive learning foundation
-- **Utility Services**: EventBus, MusicTheory, Helpers, StorageManager, AudioEngine stub
+- **Utility Services**: EventBus, MusicTheory, Helpers, StorageManager, AudioEngine, AudioPlayer, Metronome
 - **Automatic Theme Detection**: Dark/light mode based on OS/browser preference with enhanced dark mode styles
 
 ### 🔄 In Progress:
-- **Musical Notation**: Working with key signatures, limited to first 16 notes per staff
-- **Advanced Randomizer**: Random selection works, weighted randomization pending
-- **Audio Features**: Web Audio API integration and metronome pending
+- **Scale Type Corrections** (Issue #4): Fixing dominant 7ths, adding staccato in 6ths and scales in thirds
+- **Time Signature Support** (Issue #6): Adding multiple time signatures to metronome
+- **Compact Scale Cards** (Issue #5): Implementing expandable detail view
+- **Next Scale Button** (Issue #3): Adding quick navigation for continuous practice
 
 ### 🎯 Immediate Next Steps:
-1. **Implement Audio Engine**: Web Audio API for scale playback and metronome
-2. **Build Metronome**: Visual and audio metronome with adjustable tempo
-3. **Progress Visualization**: Create charts and analytics dashboard
-4. **Fingering Diagrams**: Interactive Canvas-based fingering visualization
-5. **Session Recording**: Track practice sessions with timing and accuracy
+1. **Fix Scale Types** (Issue #4): Correct dominant 7ths, add staccato in 6ths, add scales in thirds
+2. **Time Signature Support** (Issue #6): Add time signature selector to metronome
+3. **Compact Scale Cards** (Issue #5): Implement expandable detail view
+4. **Next Scale Button** (Issue #3): Add quick navigation for practice flow
+5. **Progress Visualization**: Create charts and analytics dashboard
+6. **Fingering Diagrams**: Interactive Canvas-based fingering visualization
+7. **Session Recording**: Track practice sessions with timing and accuracy
 
 ### 📊 Overall Progress:
 - **Phase 1 (Research & Requirements)**: ✅ 100% Complete
 - **Phase 2 (Core Infrastructure)**: ✅ 100% Complete
-- **Phase 3 (Randomizer & Challenge)**: 🔄 50% Complete (audio features pending)
+- **Phase 3 (Randomizer & Challenge)**: ✅ 95% Complete (microphone input pending)
 - **Phase 4 (Learning & Progress)**: 🔄 35% Complete (visualization pending)
 - **Phase 5 (Polish & Enhancement)**: 🔄 30% Complete (optimization pending)
 - **Phase 6 (Testing & Deployment)**: ⏳ 15% Complete (docs and deployment pending)
@@ -314,14 +344,17 @@ A single-page HTML application designed to help ABRSM Grade 8 pianists practice 
 ### 🚀 Key Technical Achievements:
 - ✅ Event-driven architecture with pub/sub pattern
 - ✅ Complete ABRSM Grade 8 scales database (35 scales/arpeggios, 2025/2026 syllabus)
-- ✅ Proper arpeggio generation with interval patterns (major: 4-3-5, minor: 3-4-5, dominant 7th, diminished 7th)
-- ✅ VexFlow integration with key signatures, accidentals, and beaming
-- ✅ Hand splitting at middle C (MIDI 60) for dual-clef notation
+- ✅ Web Audio API implementation with oscillator-based synthesis and ADSR envelope
+- ✅ Two-hand simultaneous playback with proper octave spacing (F2/F3 minimums)
+- ✅ Precise metronome with 25ms scheduling lookahead
+- ✅ Minim-based tempo system (88 minims/min = 176 quarters/min)
+- ✅ VexFlow integration with key signatures, quarter note endings, mixed durations
+- ✅ Hand splitting at F2/F3 for dual-clef notation
 - ✅ Enhanced scale browser with grouping, filtering, and search
-- ✅ IndexedDB-based offline-first architecture
+- ✅ IndexedDB version 2 with auto-repopulation mechanism
 - ✅ Modular component system with clear separation of concerns
-- ✅ Responsive UI with dark mode support and hover effects
-- ✅ Git version control with 20+ commits to GitHub
+- ✅ Responsive UI with dark mode support and animated beat indicators
+- ✅ Git version control with 25+ commits to GitHub
 
 ### 🎓 ABRSM 2025/2026 Syllabus Implementation:
 - ✅ Updated to 2025/2026 requirements
@@ -357,11 +390,12 @@ A single-page HTML application designed to help ABRSM Grade 8 pianists practice 
 - ~~Add all arpeggios and dominant/diminished 7th chords~~ ✅ Complete
 - **Achieved**: 35 total scale entries matching ABRSM 2025/2026 syllabus
 
-### Priority 2: Implement Audio Features
-- Build Web Audio API integration in audio-engine.js
-- Create scale playback functionality
-- Implement working metronome component
-- Add audio feedback for practice sessions
+### Priority 2: Fix Scale Data (Issue #4)
+- Review ABRSM 2025/2026 syllabus for complete requirements
+- Fix dominant 7th scale patterns and note sequences
+- Add or correct staccato in 6ths configurations
+- Implement scales in thirds (major and minor)
+- Update database version to trigger repopulation
 
 ### Priority 3: Enhance User Experience
 - Build progress visualization charts

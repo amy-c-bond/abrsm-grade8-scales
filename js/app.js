@@ -130,15 +130,15 @@ class App {
             metronomeBtn.addEventListener('click', () => {
                 if (metronome.isPlaying) {
                     metronome.stop();
-                    metronomeBtn.classList.remove('btn-secondary');
-                    metronomeBtn.classList.add('btn-outline-secondary');
+                    metronomeBtn.classList.remove('btn-primary');
+                    metronomeBtn.classList.add('btn-outline-primary');
                     metronomeText.textContent = 'Metronome';
                     this.clearNavbarBeatIndicators();
                 } else {
                     const tempo = parseInt(metroTempoInput.value) || 88;
                     metronome.start(tempo, 4);
-                    metronomeBtn.classList.remove('btn-outline-secondary');
-                    metronomeBtn.classList.add('btn-secondary');
+                    metronomeBtn.classList.remove('btn-outline-primary');
+                    metronomeBtn.classList.add('btn-primary');
                     metronomeText.textContent = 'Stop';
                 }
             });

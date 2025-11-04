@@ -172,7 +172,7 @@ class AudioEngine {
         }
 
         // MIDI constants
-        const F2_MIDI = 41; // F2
+        const C2_MIDI = 36; // C2
         const F3_MIDI = 53; // F3
         
         // Calculate transposition for each hand to meet minimum requirements
@@ -184,28 +184,40 @@ class AudioEngine {
             rightHandShift += 12;
         }
         
-        // Left hand: one octave below right hand
-        let leftHandShift = rightHandShift - 12;
+        console.log('Audio playback - Hand shifts:', { rightHandShift });
         
-        // Ensure left hand doesn't go below F2
-        while (startingNoteMidi + leftHandShift < F2_MIDI) {
-            leftHandShift += 12;
-        }
-        
-        console.log('Audio playback - Hand shifts:', { rightHandShift, leftHandShift });
-        
-        // Generate right and left hand notes
+        // Generate right hand notes
         const rightHandNotes = notes.map(note => ({
             name: MusicTheory.midiToNoteName(note.midi + rightHandShift),
             midi: note.midi + rightHandShift,
             frequency: MusicTheory.midiToFrequency(note.midi + rightHandShift)
         }));
         
-        const leftHandNotes = notes.map(note => ({
-            name: MusicTheory.midiToNoteName(note.midi + leftHandShift),
-            midi: note.midi + leftHandShift,
-            frequency: MusicTheory.midiToFrequency(note.midi + leftHandShift)
-        }));
+        // Generate left hand notes
+        let leftHandNotes;
+        if (scale.handsOptions?.contraryMotion) {
+            // For contrary motion: left hand starts one octave below right hand, same note
+            const leftStartingNote = startingNoteMidi + rightHandShift - 12;
+            leftHandNotes = notes.map(note => {
+                const relativeShift = note.midi - startingNoteMidi;
+                return {
+                    name: MusicTheory.midiToNoteName(leftStartingNote + relativeShift),
+                    midi: leftStartingNote + relativeShift,
+                    frequency: MusicTheory.midiToFrequency(leftStartingNote + relativeShift)
+                };
+            });
+        } else {
+            // For similar motion: left hand two octaves below right hand
+            let leftHandShift = rightHandShift - 24;
+            while (startingNoteMidi + leftHandShift < C2_MIDI) {
+                leftHandShift += 12;
+            }
+            leftHandNotes = notes.map(note => ({
+                name: MusicTheory.midiToNoteName(note.midi + leftHandShift),
+                midi: note.midi + leftHandShift,
+                frequency: MusicTheory.midiToFrequency(note.midi + leftHandShift)
+            }));
+        }
 
         // Tempo is in minims (half notes) per minute
         // Convert to quarter note BPM: minim BPM * 2 = quarter note BPM
@@ -218,8 +230,18 @@ class AudioEngine {
         const leftDescending = [...leftHandNotes].reverse().slice(1);
         
         // Combine ascending and descending for full scale
-        const allRightNotes = [...rightHandNotes, ...rightDescending];
-        const allLeftNotes = [...leftHandNotes, ...leftDescending];
+        let allRightNotes, allLeftNotes;
+        
+        if (scale.handsOptions?.contraryMotion) {
+            // CONTRARY MOTION: Right hand normal, left hand reversed
+            allRightNotes = [...rightHandNotes, ...rightDescending];
+            // Left hand plays in reverse order (descending when RH ascends, ascending when RH descends)
+            allLeftNotes = [...leftHandNotes, ...leftDescending].reverse();
+        } else {
+            // SIMILAR MOTION: Both hands play same direction
+            allRightNotes = [...rightHandNotes, ...rightDescending];
+            allLeftNotes = [...leftHandNotes, ...leftDescending];
+        }
         
         // Calculate quarter note duration for the final note
         const quarterNoteDuration = MusicTheory.noteDuration(quarterNoteBPM, 'quarter');
