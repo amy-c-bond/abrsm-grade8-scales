@@ -1,0 +1,616 @@
+{
+  "_comment": "EDITABLE SCALES DATABASE - All scale note sequences for ABRSM Grade 8",
+  "_instructions": "This file contains pre-generated note sequences for all scales. You can manually edit any note sequence. Format: Each note is 'NoteName + Octave' (e.g., 'C4', 'F#5', 'Bb3'). The notes are in ascending order only - the app will automatically create the descending portion.",
+  
+  "scales": [
+    {
+      "id": "c-major-scale-together",
+      "displayName": "C Major Scale (Hands Together)",
+      "key": "C",
+      "category": "major",
+      "octaves": 4,
+      "startNote": "C2",
+      "ascendingNotes": [
+        "C2", "D2", "E2", "F2", "G2", "A2", "B2",
+        "C3", "D3", "E3", "F3", "G3", "A3", "B3",
+        "C4", "D4", "E4", "F4", "G4", "A4", "B4",
+        "C5", "D5", "E5", "F5", "G5", "A5", "B5",
+        "C6"
+      ]
+    },
+    {
+      "id": "c-major-scale-contrary",
+      "displayName": "C Major Scale (Contrary Motion)",
+      "key": "C",
+      "category": "major",
+      "octaves": 2,
+      "startNote": "C3",
+      "contraryMotion": true,
+      "rightHand": {
+        "startNote": "C4",
+        "notes": [
+          "C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5", "B5", "C6",
+          "B5", "A5", "G5", "F5", "E5", "D5", "C5", "B4", "A4", "G4", "F4", "E4", "D4", "C4"
+        ]
+      },
+      "leftHand": {
+        "startNote": "C4",
+        "notes": [
+          "C4", "B3", "A3", "G3", "F3", "E3", "D3", "C3", "B2", "A2", "G2", "F2", "E2", "D2", "C2",
+          "D2", "E2", "F2", "G2", "A2", "B2", "C3", "D3", "E3", "F3", "G3", "A3", "B3", "C4"
+        ]
+      }
+    },
+    {
+      "id": "eb-major-scale-together",
+      "displayName": "E♭ Major Scale (Hands Together)",
+      "key": "Eb",
+      "category": "major",
+      "octaves": 4,
+      "startNote": "Eb2",
+      "ascendingNotes": [
+        "Eb2", "F2", "G2", "Ab2", "Bb2", "C3", "D3",
+        "Eb3", "F3", "G3", "Ab3", "Bb3", "C4", "D4",
+        "Eb4", "F4", "G4", "Ab4", "Bb4", "C5", "D5",
+        "Eb5", "F5", "G5", "Ab5", "Bb5", "C6", "D6",
+        "Eb6"
+      ]
+    },
+    {
+      "id": "eb-major-scale-contrary",
+      "displayName": "E♭ Major Scale (Contrary Motion)",
+      "key": "Eb",
+      "category": "major",
+      "octaves": 2,
+      "startNote": "Eb3",
+      "contraryMotion": true,
+      "rightHand": {
+        "startNote": "Eb4",
+        "notes": [
+          "Eb4", "F4", "G4", "Ab4", "Bb4", "C5", "D5", "Eb5", "F5", "G5", "Ab5", "Bb5", "C6", "D6", "Eb6",
+          "D6", "C6", "Bb5", "Ab5", "G5", "F5", "Eb5", "D5", "C5", "Bb4", "Ab4", "G4", "F4", "Eb4"
+        ]
+      },
+      "leftHand": {
+        "startNote": "Eb4",
+        "notes": [
+          "Eb4", "D4", "C4", "Bb3", "Ab3", "G3", "F3", "Eb3", "D3", "C3", "Bb2", "Ab2", "G2", "F2", "Eb2",
+          "F2", "G2", "Ab2", "Bb2", "C3", "D3", "Eb3", "F3", "G3", "Ab3", "Bb3", "C4", "D4", "Eb4"
+        ]
+      }
+    },
+    {
+      "id": "eb-major-scale-thirds",
+      "displayName": "E♭ Major Scale in Thirds",
+      "key": "Eb",
+      "category": "major-thirds",
+      "octaves": 2,
+      "startNote": "Eb3",
+      "ascendingNotes": [
+        "Eb3", "F3", "G3", "Ab3", "Bb3", "C4", "D4",
+        "Eb4", "F4", "G4", "Ab4", "Bb4", "C5", "D5",
+        "Eb5"
+      ]
+    },
+    {
+      "id": "f-sharp-major-scale-together",
+      "displayName": "F# Major Scale (Hands Together)",
+      "key": "F#",
+      "category": "major",
+      "octaves": 4,
+      "startNote": "F#2",
+      "ascendingNotes": [
+        "F#2", "G#2", "A#2", "B2", "C#3", "D#3", "E#3",
+        "F#3", "G#3", "A#3", "B3", "C#4", "D#4", "E#4",
+        "F#4", "G#4", "A#4", "B4", "C#5", "D#5", "E#5",
+        "F#5", "G#5", "A#5", "B5", "C#6", "D#6", "E#6",
+        "F#6"
+      ]
+    },
+    {
+      "id": "f-sharp-major-scale-contrary",
+      "displayName": "F# Major Scale (Contrary Motion)",
+      "key": "F#",
+      "category": "major",
+      "octaves": 2,
+      "startNote": "F#3",
+      "contraryMotion": true,
+      "rightHand": {
+        "startNote": "F#4",
+        "notes": [
+          "F#4", "G#4", "A#4", "B4", "C#5", "D#5", "E#5", "F#5", "G#5", "A#5", "B5", "C#6", "D#6", "E#6", "F#6",
+          "E#6", "D#6", "C#6", "B5", "A#5", "G#5", "F#5", "E#5", "D#5", "C#5", "B4", "A#4", "G#4", "F#4"
+        ]
+      },
+      "leftHand": {
+        "startNote": "F#4",
+        "notes": [
+          "F#4", "E#4", "D#4", "C#4", "B3", "A#3", "G#3", "F#3", "E#3", "D#3", "C#3", "B2", "A#2", "G#2", "F#2",
+          "G#2", "A#2", "B2", "C#3", "D#3", "E#3", "F#3", "G#3", "A#3", "B3", "C#4", "D#4", "E#4", "F#4"
+        ]
+      }
+    },
+    {
+      "id": "a-major-scale-together",
+      "displayName": "A Major Scale (Hands Together)",
+      "key": "A",
+      "category": "major",
+      "octaves": 4,
+      "startNote": "A2",
+      "ascendingNotes": [
+        "A2", "B2", "C#3", "D3", "E3", "F#3", "G#3",
+        "A3", "B3", "C#4", "D4", "E4", "F#4", "G#4",
+        "A4", "B4", "C#5", "D5", "E5", "F#5", "G#5",
+        "A5", "B5", "C#6", "D6", "E6", "F#6", "G#6",
+        "A6"
+      ]
+    },
+    {
+      "id": "a-major-scale-contrary",
+      "displayName": "A Major Scale (Contrary Motion)",
+      "key": "A",
+      "category": "major",
+      "octaves": 2,
+      "startNote": "A3",
+      "contraryMotion": true,
+      "rightHand": {
+        "startNote": "A3",
+        "notes": [
+          "A3", "B3", "C#4", "D4", "E4", "F#4", "G#4", "A4", "B4", "C#5", "D5", "E5", "F#5", "G#5", "A5",
+          "G#5", "F#5", "E5", "D5", "C#5", "B4", "A4", "G#4", "F#4", "E4", "D4", "C#4", "B3", "A3"
+        ]
+      },
+      "leftHand": {
+        "startNote": "A3",
+        "notes": [
+          "A3", "G#3", "F#3", "E3", "D3", "C#3", "B2", "A2", "G#2", "F#2", "E2", "D2", "C#2", "B1", "A1",
+          "B1", "C#2", "D2", "E2", "F#2", "G#2", "A2", "B2", "C#3", "D3", "E3", "F#3", "G#3", "A3"
+        ]
+      }
+    },
+    {
+      "id": "c-minor-harmonic-scale-together",
+      "displayName": "C Minor Harmonic Scale (Hands Together)",
+      "key": "C",
+      "category": "minorHarmonic",
+      "octaves": 4,
+      "startNote": "C2",
+      "ascendingNotes": [
+        "C2", "D2", "Eb2", "F2", "G2", "Ab2", "B2",
+        "C3", "D3", "Eb3", "F3", "G3", "Ab3", "B3",
+        "C4", "D4", "Eb4", "F4", "G4", "Ab4", "B4",
+        "C5", "D5", "Eb5", "F5", "G5", "Ab5", "B5",
+        "C6"
+      ]
+    },
+    {
+      "id": "c-minor-melodic-scale-together",
+      "displayName": "C Minor Melodic Scale (Hands Together)",
+      "key": "C",
+      "category": "minorMelodic",
+      "octaves": 4,
+      "startNote": "C2",
+      "ascendingNotes": [
+        "C2", "D2", "Eb2", "F2", "G2", "A2", "B2",
+        "C3", "D3", "Eb3", "F3", "G3", "A3", "B3",
+        "C4", "D4", "Eb4", "F4", "G4", "A4", "B4",
+        "C5", "D5", "Eb5", "F5", "G5", "A5", "B5",
+        "C6"
+      ],
+      "descendingNotes": [
+        "C6", "Bb5", "Ab5", "G5", "F5", "Eb5", "D5",
+        "C5", "Bb4", "Ab4", "G4", "F4", "Eb4", "D4",
+        "C4", "Bb3", "Ab3", "G3", "F3", "Eb3", "D3",
+        "C3", "Bb2", "Ab2", "G2", "F2", "Eb2", "D2",
+        "C2"
+      ]
+    },
+    {
+      "id": "eb-minor-harmonic-scale-together",
+      "displayName": "E♭ Minor Harmonic Scale (Hands Together)",
+      "key": "Eb",
+      "category": "minorHarmonic",
+      "octaves": 4,
+      "startNote": "Eb2",
+      "ascendingNotes": [
+        "Eb2", "F2", "Gb2", "Ab2", "Bb2", "Cb3", "D3",
+        "Eb3", "F3", "Gb3", "Ab3", "Bb3", "Cb4", "D4",
+        "Eb4", "F4", "Gb4", "Ab4", "Bb4", "Cb5", "D5",
+        "Eb5", "F5", "Gb5", "Ab5", "Bb5", "Cb6", "D6",
+        "Eb6"
+      ]
+    },
+    {
+      "id": "eb-minor-melodic-scale-together",
+      "displayName": "E♭ Minor Melodic Scale (Hands Together)",
+      "key": "Eb",
+      "category": "minorMelodic",
+      "octaves": 4,
+      "startNote": "Eb2",
+      "ascendingNotes": [
+        "Eb2", "F2", "Gb2", "Ab2", "Bb2", "C3", "D3",
+        "Eb3", "F3", "Gb3", "Ab3", "Bb3", "C4", "D4",
+        "Eb4", "F4", "Gb4", "Ab4", "Bb4", "C5", "D5",
+        "Eb5", "F5", "Gb5", "Ab5", "Bb5", "C6", "D6",
+        "Eb6"
+      ],
+      "descendingNotes": [
+        "Eb6", "Db6", "Cb6", "Bb5", "Ab5", "Gb5", "F5",
+        "Eb5", "Db5", "Cb5", "Bb4", "Ab4", "Gb4", "F4",
+        "Eb4", "Db4", "Cb4", "Bb3", "Ab3", "Gb3", "F3",
+        "Eb3", "Db3", "Cb3", "Bb2", "Ab2", "Gb2", "F2",
+        "Eb2"
+      ]
+    },
+    {
+      "id": "f-sharp-minor-harmonic-scale-together",
+      "displayName": "F# Minor Harmonic Scale (Hands Together)",
+      "key": "F#",
+      "category": "minorHarmonic",
+      "octaves": 4,
+      "startNote": "F#2",
+      "ascendingNotes": [
+        "F#2", "G#2", "A2", "B2", "C#3", "D3", "E#3",
+        "F#3", "G#3", "A3", "B3", "C#4", "D4", "E#4",
+        "F#4", "G#4", "A4", "B4", "C#5", "D5", "E#5",
+        "F#5", "G#5", "A5", "B5", "C#6", "D6", "E#6",
+        "F#6"
+      ]
+    },
+    {
+      "id": "f-sharp-minor-melodic-scale-together",
+      "displayName": "F# Minor Melodic Scale (Hands Together)",
+      "key": "F#",
+      "category": "minorMelodic",
+      "octaves": 4,
+      "startNote": "F#2",
+      "ascendingNotes": [
+        "F#2", "G#2", "A2", "B2", "C#3", "D#3", "E#3",
+        "F#3", "G#3", "A3", "B3", "C#4", "D#4", "E#4",
+        "F#4", "G#4", "A4", "B4", "C#5", "D#5", "E#5",
+        "F#5", "G#5", "A5", "B5", "C#6", "D#6", "E#6",
+        "F#6"
+      ],
+      "descendingNotes": [
+        "F#6", "E6", "D6", "C#6", "B5", "A5", "G#5",
+        "F#5", "E5", "D5", "C#5", "B4", "A4", "G#4",
+        "F#4", "E4", "D4", "C#4", "B3", "A3", "G#3",
+        "F#3", "E3", "D3", "C#3", "B2", "A2", "G#2",
+        "F#2"
+      ]
+    },
+    {
+      "id": "a-minor-harmonic-scale-together",
+      "displayName": "A Minor Harmonic Scale (Hands Together)",
+      "key": "A",
+      "category": "minorHarmonic",
+      "octaves": 4,
+      "startNote": "A2",
+      "ascendingNotes": [
+        "A2", "B2", "C3", "D3", "E3", "F3", "G#3",
+        "A3", "B3", "C4", "D4", "E4", "F4", "G#4",
+        "A4", "B4", "C5", "D5", "E5", "F5", "G#5",
+        "A5", "B5", "C6", "D6", "E6", "F6", "G#6",
+        "A6"
+      ]
+    },
+    {
+      "id": "a-minor-melodic-scale-together",
+      "displayName": "A Minor Melodic Scale (Hands Together)",
+      "key": "A",
+      "category": "minorMelodic",
+      "octaves": 4,
+      "startNote": "A2",
+      "ascendingNotes": [
+        "A2", "B2", "C3", "D3", "E3", "F#3", "G#3",
+        "A3", "B3", "C4", "D4", "E4", "F#4", "G#4",
+        "A4", "B4", "C5", "D5", "E5", "F#5", "G#5",
+        "A5", "B5", "C6", "D6", "E6", "F#6", "G#6",
+        "A6"
+      ],
+      "descendingNotes": [
+        "A6", "G6", "F6", "E6", "D6", "C6", "B5",
+        "A5", "G5", "F5", "E5", "D5", "C5", "B4",
+        "A4", "G4", "F4", "E4", "D4", "C4", "B3",
+        "A3", "G3", "F3", "E3", "D3", "C3", "B2",
+        "A2"
+      ]
+    },
+    {
+      "id": "c-chromatic-scale",
+      "displayName": "C Chromatic Scale",
+      "key": "C",
+      "category": "chromatic",
+      "octaves": 4,
+      "startNote": "C2",
+      "ascendingNotes": [
+        "C2", "C#2", "D2", "D#2", "E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2",
+        "C3", "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3", "A3", "A#3", "B3",
+        "C4", "C#4", "D4", "D#4", "E4", "F4", "F#4", "G4", "G#4", "A4", "A#4", "B4",
+        "C5", "C#5", "D5", "D#5", "E5", "F5", "F#5", "G5", "G#5", "A5", "A#5", "B5",
+        "C6"
+      ]
+    },
+    {
+      "id": "c-whole-tone-scale",
+      "displayName": "C Whole-Tone Scale",
+      "key": "C",
+      "category": "wholeTone",
+      "octaves": 4,
+      "startNote": "C2",
+      "ascendingNotes": [
+        "C2", "D2", "E2", "F#2", "G#2", "A#2",
+        "C3", "D3", "E3", "F#3", "G#3", "A#3",
+        "C4", "D4", "E4", "F#4", "G#4", "A#4",
+        "C5", "D5", "E5", "F#5", "G#5", "A#5",
+        "C6"
+      ]
+    },
+    {
+      "id": "eb-whole-tone-scale",
+      "displayName": "E♭ Whole-Tone Scale",
+      "key": "Eb",
+      "category": "wholeTone",
+      "octaves": 4,
+      "startNote": "Eb2",
+      "ascendingNotes": [
+        "Eb2", "F2", "G2", "A2", "B2", "C#3",
+        "Eb3", "F3", "G3", "A3", "B3", "C#4",
+        "Eb4", "F4", "G4", "A4", "B4", "C#5",
+        "Eb5", "F5", "G5", "A5", "B5", "C#6",
+        "Eb6"
+      ]
+    },
+    {
+      "id": "c-major-staccato-sixths",
+      "displayName": "C Major Staccato Scale in Sixths",
+      "key": "C",
+      "category": "major-sixths",
+      "octaves": 2,
+      "startNote": "C3",
+      "ascendingNotes": [
+        "C3", "D3", "E3", "F3", "G3", "A3", "B3",
+        "C4", "D4", "E4", "F4", "G4", "A4", "B4",
+        "C5"
+      ]
+    },
+    {
+      "id": "c-major-arpeggio-2nd-inversion",
+      "displayName": "C Major Arpeggio (2nd Inversion)",
+      "key": "C",
+      "category": "major-arpeggio",
+      "octaves": 4,
+      "startNote": "G2",
+      "ascendingNotes": [
+        "G2", "C3", "E3",
+        "G3", "C4", "E4",
+        "G4", "C5", "E5",
+        "G5", "C6", "E6",
+        "G6"
+      ]
+    },
+    {
+      "id": "eb-major-arpeggio-2nd-inversion",
+      "displayName": "E♭ Major Arpeggio (2nd Inversion)",
+      "key": "Eb",
+      "category": "major-arpeggio",
+      "octaves": 4,
+      "startNote": "Bb2",
+      "ascendingNotes": [
+        "Bb2", "Eb3", "G3",
+        "Bb3", "Eb4", "G4",
+        "Bb4", "Eb5", "G5",
+        "Bb5", "Eb6", "G6",
+        "Bb6"
+      ]
+    },
+    {
+      "id": "f-sharp-major-arpeggio-2nd-inversion",
+      "displayName": "F# Major Arpeggio (2nd Inversion)",
+      "key": "F#",
+      "category": "major-arpeggio",
+      "octaves": 4,
+      "startNote": "C#3",
+      "ascendingNotes": [
+        "C#3", "F#3", "A#3",
+        "C#4", "F#4", "A#4",
+        "C#5", "F#5", "A#5",
+        "C#6", "F#6", "A#6",
+        "C#7"
+      ]
+    },
+    {
+      "id": "a-major-arpeggio-2nd-inversion",
+      "displayName": "A Major Arpeggio (2nd Inversion)",
+      "key": "A",
+      "category": "major-arpeggio",
+      "octaves": 4,
+      "startNote": "E3",
+      "ascendingNotes": [
+        "E3", "A3", "C#4",
+        "E4", "A4", "C#5",
+        "E5", "A5", "C#6",
+        "E6", "A6", "C#7",
+        "E7"
+      ]
+    },
+    {
+      "id": "c-minor-arpeggio-2nd-inversion",
+      "displayName": "C Minor Arpeggio (2nd Inversion)",
+      "key": "C",
+      "category": "minor-arpeggio",
+      "octaves": 4,
+      "startNote": "G2",
+      "ascendingNotes": [
+        "G2", "C3", "Eb3",
+        "G3", "C4", "Eb4",
+        "G4", "C5", "Eb5",
+        "G5", "C6", "Eb6",
+        "G6"
+      ]
+    },
+    {
+      "id": "eb-minor-arpeggio-2nd-inversion",
+      "displayName": "E♭ Minor Arpeggio (2nd Inversion)",
+      "key": "Eb",
+      "category": "minor-arpeggio",
+      "octaves": 4,
+      "startNote": "Bb2",
+      "ascendingNotes": [
+        "Bb2", "Eb3", "Gb3",
+        "Bb3", "Eb4", "Gb4",
+        "Bb4", "Eb5", "Gb5",
+        "Bb5", "Eb6", "Gb6",
+        "Bb6"
+      ]
+    },
+    {
+      "id": "f-sharp-minor-arpeggio-2nd-inversion",
+      "displayName": "F# Minor Arpeggio (2nd Inversion)",
+      "key": "F#",
+      "category": "minor-arpeggio",
+      "octaves": 4,
+      "startNote": "C#3",
+      "ascendingNotes": [
+        "C#3", "F#3", "A3",
+        "C#4", "F#4", "A4",
+        "C#5", "F#5", "A5",
+        "C#6", "F#6", "A6",
+        "C#7"
+      ]
+    },
+    {
+      "id": "a-minor-arpeggio-2nd-inversion",
+      "displayName": "A Minor Arpeggio (2nd Inversion)",
+      "key": "A",
+      "category": "minor-arpeggio",
+      "octaves": 4,
+      "startNote": "E3",
+      "ascendingNotes": [
+        "E3", "A3", "C4",
+        "E4", "A4", "C5",
+        "E5", "A5", "C6",
+        "E6", "A6", "C7",
+        "E7"
+      ]
+    },
+    {
+      "id": "g7-arpeggio-in-c",
+      "displayName": "Dominant 7th in the key of C",
+      "key": "C",
+      "category": "dominant7-arpeggio",
+      "octaves": 4,
+      "startNote": "G2",
+      "ascendingNotes": [
+        "G2", "B2", "D3", "F3",
+        "G3", "B3", "D4", "F4",
+        "G4", "B4", "D5", "F5",
+        "G5", "B5", "D6", "F6",
+        "G6"
+      ],
+      "descendingNotes": [
+        "F6", "D6", "B5", "G5",
+        "F5", "D5", "B4", "G4",
+        "F4", "D4", "B3", "G3",
+        "F3", "D3", "B2", "G2",
+        "C3"
+      ]
+    },
+    {
+      "id": "bb7-arpeggio-in-eb",
+      "displayName": "Dominant 7th in the key of E♭",
+      "key": "Eb",
+      "category": "dominant7-arpeggio",
+      "octaves": 4,
+      "startNote": "Bb2",
+      "ascendingNotes": [
+        "Bb2", "D3", "F3", "Ab3",
+        "Bb3", "D4", "F4", "Ab4",
+        "Bb4", "D5", "F5", "Ab5",
+        "Bb5", "D6", "F6", "Ab6",
+        "Bb6"
+      ],
+      "descendingNotes": [
+        "Ab6", "F6", "D6", "Bb5",
+        "Ab5", "F5", "D5", "Bb4",
+        "Ab4", "F4", "D4", "Bb3",
+        "Ab3", "F3", "D3", "Bb2",
+        "Eb3"
+      ]
+    },
+    {
+      "id": "c-sharp-7-arpeggio-in-f-sharp",
+      "displayName": "Dominant 7th in the key of F#",
+      "key": "F#",
+      "category": "dominant7-arpeggio",
+      "octaves": 4,
+      "startNote": "C#3",
+      "ascendingNotes": [
+        "C#3", "E#3", "G#3", "B3",
+        "C#4", "E#4", "G#4", "B4",
+        "C#5", "E#5", "G#5", "B5",
+        "C#6", "E#6", "G#6", "B6",
+        "C#7"
+      ],
+      "descendingNotes": [
+        "B6", "G#6", "E#6", "C#6",
+        "B5", "G#5", "E#5", "C#5",
+        "B4", "G#4", "E#4", "C#4",
+        "B3", "G#3", "E#3", "C#3",
+        "F#3"
+      ]
+    },
+    {
+      "id": "e7-arpeggio-in-a",
+      "displayName": "Dominant 7th in the key of A",
+      "key": "A",
+      "category": "dominant7-arpeggio",
+      "octaves": 4,
+      "startNote": "E3",
+      "ascendingNotes": [
+        "E3", "G#3", "B3", "D4",
+        "E4", "G#4", "B4", "D5",
+        "E5", "G#5", "B5", "D6",
+        "E6", "G#6", "B6", "D7",
+        "E7"
+      ],
+      "descendingNotes": [
+        "D7", "B6", "G#6", "E6",
+        "D6", "B5", "G#5", "E5",
+        "D5", "B4", "G#4", "E4",
+        "D4", "B3", "G#3", "E3",
+        "A3"
+      ]
+    },
+    {
+      "id": "c-dim7-arpeggio-root",
+      "displayName": "C Diminished 7th Arpeggio (Root Position)",
+      "key": "C",
+      "category": "diminished7-arpeggio",
+      "octaves": 4,
+      "startNote": "C2",
+      "ascendingNotes": [
+        "C2", "Eb2", "Gb2", "A2",
+        "C3", "Eb3", "Gb3", "A3",
+        "C4", "Eb4", "Gb4", "A4",
+        "C5", "Eb5", "Gb5", "A5",
+        "C6"
+      ]
+    },
+    {
+      "id": "eb-dim7-arpeggio-root",
+      "displayName": "E♭ Diminished 7th Arpeggio (Root Position)",
+      "key": "Eb",
+      "category": "diminished7-arpeggio",
+      "octaves": 4,
+      "startNote": "Eb2",
+      "ascendingNotes": [
+        "Eb2", "Gb2", "A2", "C3",
+        "Eb3", "Gb3", "A3", "C4",
+        "Eb4", "Gb4", "A4", "C5",
+        "Eb5", "Gb5", "A5", "C6",
+        "Eb6"
+      ]
+    }
+  ]
+}

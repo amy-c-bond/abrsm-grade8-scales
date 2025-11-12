@@ -65,7 +65,11 @@ class MusicTheory {
      * @returns {number} MIDI note number
      */
     static noteNameToMidi(noteName) {
-        const match = noteName.match(/^([A-G][#b]?)(\d+)$/);
+        // Handle natural sign notation (e.g., "Dn4" -> "D4")
+        // The 'n' is just for explicit natural display in VexFlow
+        const normalizedNote = noteName.replace(/([A-G])n(\d+)/, '$1$2');
+        
+        const match = normalizedNote.match(/^([A-G][#b]?)(\d+)$/);
         if (!match) {
             throw new Error(`Invalid note name: ${noteName}`);
         }

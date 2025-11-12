@@ -158,65 +158,179 @@ class AudioEngine {
 
         let isStopped = false;
         
-        // Generate scale notes using MusicTheory
-        const rootNote = scale.key + '2';
-        const scaleType = this.getScaleTypeForGeneration(scale);
-        const octaves = scale.range?.octaves || 2;
+        // Generate scale notes - check for pre-defined notes first (for dominant7 and special cases)
+        let notes, descendingNotes = null;
         
-        let notes;
-        try {
-            notes = MusicTheory.generateScale(rootNote, scaleType, octaves);
-        } catch (error) {
-            console.error('Error generating scale:', error);
-            return { stop: () => {} };
+        if (scale.ascendingNotes && scale.descendingNotes) {
+            // Use pre-defined notes from the scale definition
+            const allAscending = scale.ascendingNotes.map(noteName => ({
+                name: noteName,
+                midi: MusicTheory.noteNameToMidi(noteName),
+                frequency: MusicTheory.midiToFrequency(MusicTheory.noteNameToMidi(noteName))
+            }));
+            const allDescending = scale.descendingNotes.map(noteName => ({
+                name: noteName,
+                midi: MusicTheory.noteNameToMidi(noteName),
+                frequency: MusicTheory.midiToFrequency(MusicTheory.noteNameToMidi(noteName))
+            }));
+            
+            // For audio, use all notes (4 octaves for dominant7-arpeggio)
+            notes = allAscending;
+            descendingNotes = allDescending;
+        } else {
+            // Generate scale/arpeggio notes using MusicTheory
+            const rootNote = scale.key + '2';
+            const octaves = scale.range?.octaves || 2;
+            
+            try {
+                // Check if this is an arpeggio
+                if (scale.type === 'arpeggio') {
+                    const is2ndInversion = scale.id.includes('2nd-inversion');
+                    
+                    // Select correct intervals based on category and inversion
+                    let intervals;
+                    if (scale.category === 'major') {
+                        intervals = is2ndInversion ? MusicTheory.INTERVALS.majorArpeggio2ndInv : MusicTheory.INTERVALS.majorArpeggio;
+                    } else if (scale.category === 'minor') {
+                        intervals = is2ndInversion ? MusicTheory.INTERVALS.minorArpeggio2ndInv : MusicTheory.INTERVALS.minorArpeggio;
+                    } else {
+                        // For other arpeggios (diminished7, etc.), use regular intervals
+                        intervals = MusicTheory.INTERVALS.majorArpeggio;
+                    }
+                    
+                    // Generate arpeggio using the intervals
+                    notes = this.generateArpeggio(rootNote, intervals, octaves);
+                } else {
+                    // Generate scale notes
+                    const scaleType = this.getScaleTypeForGeneration(scale);
+                    notes = MusicTheory.generateScale(rootNote, scaleType, octaves);
+                }
+                
+                // For melodic minor, generate separate descending notes using natural minor
+                if (scale.category === 'minorMelodic') {
+                    descendingNotes = MusicTheory.generateScale(rootNote, 'minorNatural', octaves);
+                }
+            } catch (error) {
+                console.error('Error generating scale:', error);
+                return { stop: () => {} };
+            }
         }
 
         // MIDI constants
-        const C2_MIDI = 36; // C2
+        const C2_MIDI = 36; // C2 (minimum for left hand - similar motion)
+        const A1_MIDI = 33; // A1 (minimum for left hand - contrary motion)
+        const E2_MIDI = 40; // E2 (minimum for left hand - dominant7 arpeggios)
         const F3_MIDI = 53; // F3
         
-        // Calculate transposition for each hand to meet minimum requirements
-        const startingNoteMidi = notes[0].midi;
+        // Check if we're using pre-defined notes (dominant7 arpeggios, etc.)
+        const usingPredefinedNotes = scale.ascendingNotes && scale.descendingNotes;
         
-        // Right hand: minimum F3
-        let rightHandShift = 0;
-        while (startingNoteMidi + rightHandShift < F3_MIDI) {
-            rightHandShift += 12;
-        }
+        let rightHandNotes, leftHandNotes, rightDescendingSource, leftDescendingSource;
         
-        console.log('Audio playback - Hand shifts:', { rightHandShift });
-        
-        // Generate right hand notes
-        const rightHandNotes = notes.map(note => ({
-            name: MusicTheory.midiToNoteName(note.midi + rightHandShift),
-            midi: note.midi + rightHandShift,
-            frequency: MusicTheory.midiToFrequency(note.midi + rightHandShift)
-        }));
-        
-        // Generate left hand notes
-        let leftHandNotes;
-        if (scale.handsOptions?.contraryMotion) {
-            // For contrary motion: left hand starts one octave below right hand, same note
-            const leftStartingNote = startingNoteMidi + rightHandShift - 12;
-            leftHandNotes = notes.map(note => {
-                const relativeShift = note.midi - startingNoteMidi;
-                return {
-                    name: MusicTheory.midiToNoteName(leftStartingNote + relativeShift),
-                    midi: leftStartingNote + relativeShift,
-                    frequency: MusicTheory.midiToFrequency(leftStartingNote + relativeShift)
-                };
-            });
-        } else {
-            // For similar motion: left hand two octaves below right hand
-            let leftHandShift = rightHandShift - 24;
-            while (startingNoteMidi + leftHandShift < C2_MIDI) {
+        if (usingPredefinedNotes) {
+            // For pre-defined notes (like dominant7 arpeggios), use them directly for right hand
+            // They already have the correct octaves set for right hand
+            rightHandNotes = notes;
+            rightDescendingSource = descendingNotes;
+            
+            // For left hand, transpose down to start from E2 minimum
+            const startingNoteMidi = notes[0].midi;
+            let leftHandShift = -24; // Start 2 octaves below right hand
+            
+            // Adjust up if we go below E2
+            while (startingNoteMidi + leftHandShift < E2_MIDI) {
                 leftHandShift += 12;
             }
+            
+            // Transpose left hand notes
             leftHandNotes = notes.map(note => ({
                 name: MusicTheory.midiToNoteName(note.midi + leftHandShift),
                 midi: note.midi + leftHandShift,
                 frequency: MusicTheory.midiToFrequency(note.midi + leftHandShift)
             }));
+            
+            leftDescendingSource = descendingNotes.map(note => ({
+                name: MusicTheory.midiToNoteName(note.midi + leftHandShift),
+                midi: note.midi + leftHandShift,
+                frequency: MusicTheory.midiToFrequency(note.midi + leftHandShift)
+            }));
+        } else {
+            // Calculate transposition for each hand to meet minimum requirements
+            const startingNoteMidi = notes[0].midi;
+            
+            // Right hand: minimum F3
+            let rightHandShift = 0;
+            while (startingNoteMidi + rightHandShift < F3_MIDI) {
+                rightHandShift += 12;
+            }
+            
+            console.log('Audio playback - Hand shifts:', { rightHandShift });
+            
+            // Generate right hand notes
+            rightHandNotes = notes.map(note => ({
+                name: MusicTheory.midiToNoteName(note.midi + rightHandShift),
+                midi: note.midi + rightHandShift,
+                frequency: MusicTheory.midiToFrequency(note.midi + rightHandShift)
+            }));
+            
+            // Generate right hand descending notes (use natural minor for melodic minor)
+            rightDescendingSource = descendingNotes ? descendingNotes.map(note => ({
+                name: MusicTheory.midiToNoteName(note.midi + rightHandShift),
+                midi: note.midi + rightHandShift,
+                frequency: MusicTheory.midiToFrequency(note.midi + rightHandShift)
+            })) : rightHandNotes;
+            
+            // Generate left hand notes
+            if (scale.handsOptions?.contraryMotion) {
+                // For contrary motion: both hands start on the SAME note (same octave)
+                // Left hand goes DOWN while right hand goes UP
+                const leftStartingNote = startingNoteMidi + rightHandShift; // SAME as right hand
+                leftHandNotes = notes.map(note => {
+                    const relativeShift = note.midi - startingNoteMidi;
+                    return {
+                        name: MusicTheory.midiToNoteName(leftStartingNote - relativeShift), // SUBTRACT to go down
+                        midi: leftStartingNote - relativeShift,
+                        frequency: MusicTheory.midiToFrequency(leftStartingNote - relativeShift)
+                    };
+                });
+                
+                // For melodic minor descending
+                if (descendingNotes) {
+                    leftDescendingSource = descendingNotes.map(note => {
+                        const relativeShift = note.midi - startingNoteMidi;
+                        return {
+                            name: MusicTheory.midiToNoteName(leftStartingNote - relativeShift),
+                            midi: leftStartingNote - relativeShift,
+                            frequency: MusicTheory.midiToFrequency(leftStartingNote - relativeShift)
+                        };
+                    });
+                } else {
+                    leftDescendingSource = leftHandNotes;
+                }
+            } else {
+                // For similar motion: left hand two octaves below right hand
+                // Don't go below C2
+                let leftHandShift = rightHandShift - 24;
+                while (startingNoteMidi + leftHandShift < C2_MIDI) {
+                    leftHandShift += 12;
+                }
+                leftHandNotes = notes.map(note => ({
+                    name: MusicTheory.midiToNoteName(note.midi + leftHandShift),
+                    midi: note.midi + leftHandShift,
+                    frequency: MusicTheory.midiToFrequency(note.midi + leftHandShift)
+                }));
+                
+                // For melodic minor descending
+                if (descendingNotes) {
+                    leftDescendingSource = descendingNotes.map(note => ({
+                        name: MusicTheory.midiToNoteName(note.midi + leftHandShift),
+                        midi: note.midi + leftHandShift,
+                        frequency: MusicTheory.midiToFrequency(note.midi + leftHandShift)
+                    }));
+                } else {
+                    leftDescendingSource = leftHandNotes;
+                }
+            }
         }
 
         // Tempo is in minims (half notes) per minute
@@ -225,18 +339,34 @@ class AudioEngine {
         const noteDuration = MusicTheory.noteDuration(quarterNoteBPM, 'eighth');
         const noteGap = 0.05; // Small gap between notes for clarity
         
-        // Create descending notes (reverse of ascending, excluding duplicate top note)
-        const rightDescending = [...rightHandNotes].reverse().slice(1);
-        const leftDescending = [...leftHandNotes].reverse().slice(1);
+        // Create descending notes 
+        // For melodic minor and dominant7, use the pre-defined descending notes (already in correct order)
+        // For others, reverse ascending
+        let rightDescending, leftDescending;
+        
+        if (descendingNotes) {
+            // Descending notes are already in correct descending order, don't reverse
+            // Just remove the first note to avoid duplicate with top of ascending
+            rightDescending = rightDescendingSource.slice(1);
+            leftDescending = leftDescendingSource.slice(1);
+        } else {
+            // No pre-defined descending, so reverse the ascending and remove first to avoid duplicate
+            rightDescending = [...rightDescendingSource].reverse().slice(1);
+            leftDescending = [...leftDescendingSource].reverse().slice(1);
+        }
         
         // Combine ascending and descending for full scale
         let allRightNotes, allLeftNotes;
         
         if (scale.handsOptions?.contraryMotion) {
-            // CONTRARY MOTION: Right hand normal, left hand reversed
+            // CONTRARY MOTION: 
+            // Right hand: ascending then descending (normal)
+            // Left hand: descending then ascending (opposite direction)
             allRightNotes = [...rightHandNotes, ...rightDescending];
-            // Left hand plays in reverse order (descending when RH ascends, ascending when RH descends)
-            allLeftNotes = [...leftHandNotes, ...leftDescending].reverse();
+            
+            // Left hand plays descending first (reversed ascending), then ascending (original without duplicate)
+            const leftAscendingBack = leftHandNotes.slice(1); // Remove duplicate starting note
+            allLeftNotes = [[...leftHandNotes].reverse(), ...leftAscendingBack].flat();
         } else {
             // SIMILAR MOTION: Both hands play same direction
             allRightNotes = [...rightHandNotes, ...rightDescending];
@@ -358,6 +488,39 @@ class AudioEngine {
         
         oscillator.start(now);
         oscillator.stop(now + 0.05);
+    }
+
+    /**
+     * Generate arpeggio notes
+     * @param {string} rootNote - Starting note (e.g., 'C2')
+     * @param {Array} intervals - Array of semitone intervals
+     * @param {number} octaves - Number of octaves to generate
+     * @returns {Array} Array of note objects with name, midi, frequency
+     */
+    generateArpeggio(rootNote, intervals, octaves) {
+        const notes = [];
+        let currentMidi = MusicTheory.noteNameToMidi(rootNote);
+        
+        // Add starting note
+        notes.push({
+            name: MusicTheory.midiToNoteName(currentMidi),
+            midi: currentMidi,
+            frequency: MusicTheory.midiToFrequency(currentMidi)
+        });
+        
+        // Generate notes for each octave
+        for (let octave = 0; octave < octaves; octave++) {
+            for (let i = 0; i < intervals.length; i++) {
+                currentMidi += intervals[i];
+                notes.push({
+                    name: MusicTheory.midiToNoteName(currentMidi),
+                    midi: currentMidi,
+                    frequency: MusicTheory.midiToFrequency(currentMidi)
+                });
+            }
+        }
+        
+        return notes;
     }
 
     /**

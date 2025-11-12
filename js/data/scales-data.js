@@ -36,7 +36,17 @@ const ScalesData = {
             articulation: { legato: true, staccato: true },
             difficulty: { technicalLevel: 5, fingeringComplexity: 4, rhythmicComplexity: 2 },
             practiceNotes: '2 octaves. Hands start one octave apart, move in opposite directions.',
-            commonMistakes: ['Hands not synchronized', 'Uneven dynamics']
+            commonMistakes: ['Hands not synchronized', 'Uneven dynamics'],
+            rightHand: {
+                startNote: 'C4',
+                notes: ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6',
+                        'B5', 'A5', 'G5', 'F5', 'E5', 'D5', 'C5', 'B4', 'A4', 'G4', 'F4', 'E4', 'D4', 'C4']
+            },
+            leftHand: {
+                startNote: 'C4',
+                notes: ['C4', 'B3', 'A3', 'G3', 'F3', 'E3', 'D3', 'C3', 'B2', 'A2', 'G2', 'F2', 'E2', 'D2', 'C2',
+                        'D2', 'E2', 'F2', 'G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4']
+            }
         },
 
         // ===== Eb MAJOR - Similar Motion =====
@@ -360,6 +370,23 @@ const ScalesData = {
             practiceNotes: '2nd inversion starting on G: G-C-E. 4 octaves.',
             commonMistakes: ['Starting note confusion', 'Fingering errors']
         },
+        {
+            id: 'g7-arpeggio-in-c',
+            type: 'arpeggio',
+            category: 'dominant7-arpeggio',
+            key: 'C',
+            tonality: 'dominant7',
+            displayName: 'Dominant 7th in the key of C',
+            tempo: { minTempo: 66, recommendedTempo: 54, examTempo: 66 },
+            range: { octaves: 4, startNote: 'G2', endNote: 'C3' },
+            handsOptions: { together: true, separately: false, contraryMotion: false },
+            articulation: { legato: true, staccato: false },
+            difficulty: { technicalLevel: 6, fingeringComplexity: 5, rhythmicComplexity: 2 },
+            practiceNotes: 'G7 arpeggio (G-B-D-F) resolving to C. Ends on tonic C.',
+            commonMistakes: ['Missing F natural', 'Final note confusion'],
+            ascendingNotes: ['G2', 'B2', 'D3', 'F3', 'G3', 'B3', 'D4', 'F4', 'G4', 'B4', 'D5', 'F5', 'G5', 'B5', 'D6', 'F6', 'G6'],
+            descendingNotes: ['F6', 'D6', 'B5', 'G5', 'F5', 'D5', 'B4', 'G4', 'F4', 'D4', 'B3', 'G3', 'F3', 'D3', 'B2', 'G2', 'C3']
+        },
 
         // ===== ARPEGGIOS - Eb MAJOR =====
         {
@@ -376,6 +403,23 @@ const ScalesData = {
             difficulty: { technicalLevel: 5, fingeringComplexity: 5, rhythmicComplexity: 2 },
             practiceNotes: '2nd inversion starting on Bb: Bb-Eb-G.',
             commonMistakes: ['Starting position errors', 'Black key control']
+        },
+        {
+            id: 'bb7-arpeggio-in-eb',
+            type: 'arpeggio',
+            category: 'dominant7-arpeggio',
+            key: 'Eb',
+            tonality: 'dominant7',
+            displayName: 'Dominant 7th in the key of E♭',
+            tempo: { minTempo: 66, recommendedTempo: 54, examTempo: 66 },
+            range: { octaves: 4, startNote: 'Bb2', endNote: 'Eb3' },
+            handsOptions: { together: true, separately: false, contraryMotion: false },
+            articulation: { legato: true, staccato: false },
+            difficulty: { technicalLevel: 7, fingeringComplexity: 6, rhythmicComplexity: 2 },
+            practiceNotes: 'Bb7 arpeggio (Bb-D-F-Ab) resolving to Eb. Ends on tonic Eb.',
+            commonMistakes: ['Black key control', 'Missing Ab', 'Final note confusion'],
+            ascendingNotes: ['Bb2', 'D3', 'F3', 'Ab3', 'Bb3', 'D4', 'F4', 'Ab4', 'Bb4', 'D5', 'F5', 'Ab5', 'Bb5', 'D6', 'F6', 'Ab6', 'Bb6'],
+            descendingNotes: ['Ab6', 'F6', 'D6', 'Bb5', 'Ab5', 'F5', 'D5', 'Bb4', 'Ab4', 'F4', 'D4', 'Bb3', 'Ab3', 'F3', 'D3', 'Bb2', 'Eb3']
         },
 
         // ===== ARPEGGIOS - F# MAJOR =====
@@ -394,6 +438,23 @@ const ScalesData = {
             practiceNotes: '2nd inversion starting on C#: C#-F#-A#.',
             commonMistakes: ['Complex fingering', 'Orientation challenges']
         },
+        {
+            id: 'c-sharp-7-arpeggio-in-f-sharp',
+            type: 'arpeggio',
+            category: 'dominant7-arpeggio',
+            key: 'F#',
+            tonality: 'dominant7',
+            displayName: 'Dominant 7th in the key of F#',
+            tempo: { minTempo: 66, recommendedTempo: 54, examTempo: 66 },
+            range: { octaves: 4, startNote: 'C#3', endNote: 'F#3' },
+            handsOptions: { together: true, separately: false, contraryMotion: false },
+            articulation: { legato: true, staccato: false },
+            difficulty: { technicalLevel: 8, fingeringComplexity: 7, rhythmicComplexity: 2 },
+            practiceNotes: 'C#7 arpeggio (C#-E#-G#-B) resolving to F#. Ends on tonic F#.',
+            commonMistakes: ['Very complex fingering', 'E# placement', 'Final note confusion'],
+            ascendingNotes: ['C#3', 'E#3', 'G#3', 'B3', 'C#4', 'E#4', 'G#4', 'B4', 'C#5', 'E#5', 'G#5', 'B5', 'C#6', 'E#6', 'G#6', 'B6', 'C#7'],
+            descendingNotes: ['B6', 'G#6', 'E#6', 'C#6', 'B5', 'G#5', 'E#5', 'C#5', 'B4', 'G#4', 'E#4', 'C#4', 'B3', 'G#3', 'E#3', 'C#3', 'F#3']
+        },
 
         // ===== ARPEGGIOS - A MAJOR =====
         {
@@ -410,6 +471,23 @@ const ScalesData = {
             difficulty: { technicalLevel: 5, fingeringComplexity: 4, rhythmicComplexity: 2 },
             practiceNotes: '2nd inversion starting on E: E-A-C#.',
             commonMistakes: ['Incorrect starting note', 'Rhythm unevenness']
+        },
+        {
+            id: 'e7-arpeggio-in-a',
+            type: 'arpeggio',
+            category: 'dominant7-arpeggio',
+            key: 'A',
+            tonality: 'dominant7',
+            displayName: 'Dominant 7th in the key of A',
+            tempo: { minTempo: 66, recommendedTempo: 54, examTempo: 66 },
+            range: { octaves: 4, startNote: 'E3', endNote: 'A3' },
+            handsOptions: { together: true, separately: false, contraryMotion: false },
+            articulation: { legato: true, staccato: false },
+            difficulty: { technicalLevel: 6, fingeringComplexity: 5, rhythmicComplexity: 2 },
+            practiceNotes: 'E7 arpeggio (E-G#-B-D) resolving to A. Ends on tonic A.',
+            commonMistakes: ['Missing D natural', 'Final note confusion'],
+            ascendingNotes: ['E3', 'G#3', 'B3', 'D4', 'E4', 'G#4', 'B4', 'D5', 'E5', 'G#5', 'B5', 'D6', 'E6', 'G#6', 'B6', 'D7', 'E7'],
+            descendingNotes: ['D7', 'B6', 'G#6', 'E6', 'D6', 'B5', 'G#5', 'E5', 'D5', 'B4', 'G#4', 'E4', 'D4', 'B3', 'G#3', 'E3', 'A3']
         },
 
         // ===== ARPEGGIOS - C MINOR =====
@@ -478,74 +556,6 @@ const ScalesData = {
             difficulty: { technicalLevel: 5, fingeringComplexity: 4, rhythmicComplexity: 2 },
             practiceNotes: '2nd inversion starting on E: E-A-C.',
             commonMistakes: ['Inversion confusion', 'Legato breaks']
-        },
-
-        // ===== DOMINANT 7TH ARPEGGIOS =====
-        {
-            id: 'c7-arpeggio-root',
-            type: 'arpeggio',
-            category: 'dominant7',
-            key: 'C',
-            tonality: 'dominant7',
-            displayName: 'C7 Arpeggio (Root Position)',
-            tempo: { minTempo: 66, recommendedTempo: 54, examTempo: 66 },
-            range: { octaves: 4, startNote: 'C2', endNote: 'C6' },
-            handsOptions: { together: true, separately: false, contraryMotion: false },
-            articulation: { legato: true, staccato: false },
-            difficulty: { technicalLevel: 6, fingeringComplexity: 5, rhythmicComplexity: 2 },
-            practiceNotes: 'C7: C-E-G-Bb. Four note arpeggio. Root position.',
-            commonMistakes: ['Missing Bb', 'Fingering complexity']
-        },
-
-        // ===== DOMINANT 7TH - Eb =====
-        {
-            id: 'eb7-arpeggio-root',
-            type: 'arpeggio',
-            category: 'dominant7',
-            key: 'Eb',
-            tonality: 'dominant7',
-            displayName: 'E♭7 Arpeggio (Root Position)',
-            tempo: { minTempo: 66, recommendedTempo: 54, examTempo: 66 },
-            range: { octaves: 4, startNote: 'Eb2', endNote: 'Eb6' },
-            handsOptions: { together: true, separately: false, contraryMotion: false },
-            articulation: { legato: true, staccato: false },
-            difficulty: { technicalLevel: 7, fingeringComplexity: 6, rhythmicComplexity: 2 },
-            practiceNotes: 'Eb7: Eb-G-Bb-Db. Root position with black keys.',
-            commonMistakes: ['Black key control', 'Missing Db']
-        },
-
-        // ===== DOMINANT 7TH - F# =====
-        {
-            id: 'f-sharp-7-arpeggio-root',
-            type: 'arpeggio',
-            category: 'dominant7',
-            key: 'F#',
-            tonality: 'dominant7',
-            displayName: 'F#7 Arpeggio (Root Position)',
-            tempo: { minTempo: 66, recommendedTempo: 54, examTempo: 66 },
-            range: { octaves: 4, startNote: 'F#2', endNote: 'F#6' },
-            handsOptions: { together: true, separately: false, contraryMotion: false },
-            articulation: { legato: true, staccato: false },
-            difficulty: { technicalLevel: 8, fingeringComplexity: 7, rhythmicComplexity: 2 },
-            practiceNotes: 'F#7: F#-A#-C#-E. Challenging black key arpeggio.',
-            commonMistakes: ['Very complex fingering', 'Orientation challenges']
-        },
-
-        // ===== DOMINANT 7TH - A =====
-        {
-            id: 'a7-arpeggio-root',
-            type: 'arpeggio',
-            category: 'dominant7',
-            key: 'A',
-            tonality: 'dominant7',
-            displayName: 'A7 Arpeggio (Root Position)',
-            tempo: { minTempo: 66, recommendedTempo: 54, examTempo: 66 },
-            range: { octaves: 4, startNote: 'A2', endNote: 'A6' },
-            handsOptions: { together: true, separately: false, contraryMotion: false },
-            articulation: { legato: true, staccato: false },
-            difficulty: { technicalLevel: 6, fingeringComplexity: 5, rhythmicComplexity: 2 },
-            practiceNotes: 'A7: A-C#-E-G. Root position.',
-            commonMistakes: ['Missing G natural', 'Four-note coordination']
         },
 
         // ===== DIMINISHED 7TH ARPEGGIOS =====

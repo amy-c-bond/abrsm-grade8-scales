@@ -47,8 +47,64 @@ class ScaleChallenge {
         const displayOctaves = scale.category === 'chromatic' ? 1 : 2;
         
         // Generate scale notes - use the correct method based on type
-        let ascendingNotes;
-        if (scale.type === 'arpeggio') {
+        let ascendingNotes, descendingNotes;
+        let rightHandNotes, leftHandNotes;
+        
+        // Check if this is a contrary motion scale with pre-defined hand notes
+        if (scale.handsOptions?.contraryMotion && scale.rightHand?.notes && scale.leftHand?.notes) {
+            // Use pre-defined right and left hand notes from the database
+            rightHandNotes = scale.rightHand.notes.map(noteName => ({
+                name: noteName,
+                midi: MusicTheory.noteNameToMidi(noteName),
+                frequency: MusicTheory.midiToFrequency(MusicTheory.noteNameToMidi(noteName))
+            }));
+            
+            leftHandNotes = scale.leftHand.notes.map(noteName => ({
+                name: noteName,
+                midi: MusicTheory.noteNameToMidi(noteName),
+                frequency: MusicTheory.midiToFrequency(MusicTheory.noteNameToMidi(noteName))
+            }));
+            
+            // Set empty arrays for ascendingNotes/descendingNotes since we're not using them
+            ascendingNotes = [];
+            descendingNotes = [];
+            
+        } else if (scale.ascendingNotes && scale.descendingNotes) {
+            // Use pre-defined notes from the scale definition
+            const allAscending = scale.ascendingNotes.map(noteName => ({
+                name: noteName,
+                midi: MusicTheory.noteNameToMidi(noteName),
+                frequency: MusicTheory.midiToFrequency(MusicTheory.noteNameToMidi(noteName))
+            }));
+            const allDescending = scale.descendingNotes.map(noteName => ({
+                name: noteName,
+                midi: MusicTheory.noteNameToMidi(noteName),
+                frequency: MusicTheory.midiToFrequency(MusicTheory.noteNameToMidi(noteName))
+            }));
+            
+            // For dominant7-arpeggio: display only 2 octaves even though 4 octaves are defined
+            // Ascending: first 9 notes (E3, G#3, B3, D4, E4, G#4, B4, D5, E5)
+            // Descending: need D5, B4, G#4, E4, D4, B3, G#3, A3 (8 notes)
+            if (scale.category === 'dominant7-arpeggio') {
+                ascendingNotes = allAscending.slice(0, 9); // First 9 notes for 2 octaves up
+                
+                // Find where D5 is in the descending array (it should be at index 8)
+                // Then take 7 notes from there (D5 to G#3), and add the resolution A3
+                const d5Index = allDescending.findIndex(note => note.name === 'D5');
+                if (d5Index !== -1) {
+                    // Take 7 notes starting from D5: D5, B4, G#4, E4, D4, B3, G#3
+                    const sevenNotes = allDescending.slice(d5Index, d5Index + 7);
+                    // Add the resolution note A3 (last note in allDescending)
+                    descendingNotes = [...sevenNotes, allDescending[allDescending.length - 1]];
+                } else {
+                    // Fallback: take last 8 notes
+                    descendingNotes = allDescending.slice(-8);
+                }
+            } else {
+                ascendingNotes = allAscending;
+                descendingNotes = allDescending;
+            }
+        } else if (scale.type === 'arpeggio') {
             // For arpeggios, determine if it's 2nd inversion based on the scale ID
             const is2ndInversion = scale.id.includes('2nd-inversion');
             
@@ -61,24 +117,64 @@ class ScaleChallenge {
             }
             
             ascendingNotes = this.generateArpeggio(scale.range.startNote, intervals, displayOctaves);
+            // For regular arpeggios: descending is just reversed ascending (excluding the top note to avoid duplication)
+            descendingNotes = ascendingNotes.slice(0, -1).reverse();
         } else {
             // For scales, use generateScale
             ascendingNotes = MusicTheory.generateScale(scale.range.startNote, scale.category, displayOctaves);
+            // Add descending notes based on category
+            if (scale.category === 'minorMelodic') {
+                // MELODIC MINOR: Descending uses natural minor (lowered 6th and 7th)
+                // Generate natural minor scale for descending
+                const descendingScale = MusicTheory.generateScale(scale.range.startNote, 'minorNatural', displayOctaves);
+                // Reverse it (excluding the starting note to avoid duplicate) and remove the top note
+                descendingNotes = descendingScale.slice(0, -1).reverse();
+            } else {
+                // All other scales: descending is just reversed ascending (excluding the top note to avoid duplication)
+                descendingNotes = ascendingNotes.slice(0, -1).reverse();
+            }
         }
         
-        // Add descending notes (excluding the top note to avoid duplication)
-        const descendingNotes = ascendingNotes.slice(0, -1).reverse();
-        const notes = [...ascendingNotes, ...descendingNotes];
+        // Create combined notes array (only if not using pre-defined hand notes)
+        const notes = (ascendingNotes && descendingNotes) ? [...ascendingNotes, ...descendingNotes] : [];
         
         // Define minimum starting notes for each hand
-        const C2_MIDI = 36; // C2 (minimum for left hand in bass clef)
+        const C2_MIDI = 36; // C2 (minimum for left hand in bass clef - default)
+        const A1_MIDI = 33; // A1 (minimum for left hand in contrary motion scales)
+        const E2_MIDI = 40; // E2 (minimum for left hand in dominant7 arpeggios)
         const F3_MIDI = 53; // F3 (minimum for right hand in treble clef)
         const F4_MIDI = 65; // F4
         const middleC = 60; // MIDI note for C4
         
-        let rightHandNotes, leftHandNotes;
+        // Check if we're using pre-defined notes (dominant7 arpeggios, etc.)
+        const usingPredefinedNotes = scale.ascendingNotes && scale.descendingNotes;
         
-        if (scale.handsOptions.together && !scale.handsOptions.separately) {
+        // Only declare rightHandNotes and leftHandNotes if not already set from contrary motion database
+        if (!rightHandNotes && !leftHandNotes) {
+            if (usingPredefinedNotes) {
+            // For pre-defined notes (like dominant7 arpeggios), use them directly for right hand
+            // They already have the correct octaves set for right hand
+            rightHandNotes = notes;
+            
+            // For left hand, transpose down to start from E2 minimum
+            const startingNoteMidi = notes[0].midi;
+            let leftHandShift = -24; // Start 2 octaves below right hand
+            
+            // Adjust up if we go below E2
+            while (startingNoteMidi + leftHandShift < E2_MIDI) {
+                leftHandShift += 12;
+            }
+            
+            // Apply key context for proper enharmonic spelling
+            const keyContext = scale.key;
+            
+            // Transpose left hand notes
+            leftHandNotes = notes.map(note => ({
+                name: MusicTheory.midiToNoteName(note.midi + leftHandShift, note.name.includes('b'), keyContext),
+                midi: note.midi + leftHandShift,
+                frequency: MusicTheory.midiToFrequency(note.midi + leftHandShift)
+            }));
+        } else if (scale.handsOptions.together && !scale.handsOptions.separately) {
             // Calculate transposition for each hand to meet minimum requirements
             const startingNoteMidi = notes[0].midi;
             
@@ -89,11 +185,12 @@ class ScaleChallenge {
             }
             
             // Left hand: start two octaves below right hand (typical piano range)
-            // Then adjust up only if we go below C2
+            // Then adjust up only if we go below the minimum (C2 for similar motion, A1 for contrary motion)
             let leftHandShift = rightHandShift - 24;
             
-            // Ensure left hand doesn't go below C2
-            while (startingNoteMidi + leftHandShift < C2_MIDI) {
+            // Ensure left hand doesn't go below minimum (A1 for contrary motion, C2 for similar motion)
+            const leftHandMinimum = scale.handsOptions.contraryMotion ? A1_MIDI : C2_MIDI;
+            while (startingNoteMidi + leftHandShift < leftHandMinimum) {
                 leftHandShift += 12;
             }
             
@@ -113,29 +210,48 @@ class ScaleChallenge {
             
             if (scale.handsOptions.contraryMotion) {
                 // CONTRARY MOTION: Hands move in opposite directions
-                // Both hands start on the SAME note (tonic), one octave apart
-                // Right hand: goes up then down
-                // Left hand: goes down then up (completely reversed)
+                // Both hands start on middle C (C4)
+                // Right hand ascends: C4-D4-E4-F4-G4-A4-B4-C5-D5-E5-F5-G5-A5-B5-C6, then back down
+                // Left hand descends: C4-B3-A3-G3-F3-E3-D3-C3-B2-A2-G2-F2-E2-D2-C2, then back up
                 
-                // Right hand plays normally
-                rightHandNotes = notes.map(note => ({
-                    name: MusicTheory.midiToNoteName(note.midi + rightHandShift, note.name.includes('b'), keyContext),
-                    midi: note.midi + rightHandShift,
-                    frequency: MusicTheory.midiToFrequency(note.midi + rightHandShift)
+                const middleC = 60; // MIDI 60 = C4
+                const shiftToMiddleC = middleC - startingNoteMidi;
+                
+                // Right hand: Start on middle C, ascend, then descend back to middle C
+                const rightAscending = ascendingNotes.map(note => ({
+                    name: MusicTheory.midiToNoteName(note.midi + shiftToMiddleC, note.name.includes('b'), keyContext),
+                    midi: note.midi + shiftToMiddleC,
+                    frequency: MusicTheory.midiToFrequency(note.midi + shiftToMiddleC)
                 }));
+                const rightDescending = [...rightAscending].reverse().slice(1);
+                rightHandNotes = [...rightAscending, ...rightDescending];
                 
-                // Left hand: Start on same tonic (one octave lower), then REVERSE all notes
-                // This creates: top->bottom->top when RH does bottom->top->bottom
-                const leftStartingNote = startingNoteMidi + rightHandShift - 12; // One octave below RH
-                leftHandNotes = notes.map(note => {
-                    // Calculate relative position from the starting note
-                    const relativeShift = note.midi - startingNoteMidi;
-                    return {
-                        name: MusicTheory.midiToNoteName(leftStartingNote + relativeShift, note.name.includes('b'), keyContext),
-                        midi: leftStartingNote + relativeShift,
-                        frequency: MusicTheory.midiToFrequency(leftStartingNote + relativeShift)
-                    };
-                }).reverse();
+                // Left hand: Start on middle C (same as right hand)
+                // Descend using the SAME intervals as right hand ascending, but going DOWN
+                const leftDescending = [];
+                let currentMidi = middleC; // Start on C4
+                
+                // Add starting note
+                leftDescending.push({
+                    name: MusicTheory.midiToNoteName(currentMidi, false, keyContext),
+                    midi: currentMidi,
+                    frequency: MusicTheory.midiToFrequency(currentMidi)
+                });
+                
+                // Go DOWN using the intervals from rightAscending
+                for (let i = 1; i < rightAscending.length; i++) {
+                    const interval = rightAscending[i].midi - rightAscending[i-1].midi;
+                    currentMidi -= interval; // Subtract to go down
+                    leftDescending.push({
+                        name: MusicTheory.midiToNoteName(currentMidi, false, keyContext),
+                        midi: currentMidi,
+                        frequency: MusicTheory.midiToFrequency(currentMidi)
+                    });
+                }
+                
+                // Then ascend back up (reverse without duplicate bottom note)
+                const leftAscending = [...leftDescending].reverse().slice(1);
+                leftHandNotes = [...leftDescending, ...leftAscending];
                 
             } else {
                 // SIMILAR MOTION: Both hands play the same direction
@@ -151,10 +267,11 @@ class ScaleChallenge {
                     frequency: MusicTheory.midiToFrequency(note.midi + leftHandShift)
                 }));
             }
-        } else {
-            // Hands separately: split at middle C
-            rightHandNotes = notes.filter(n => n.midi >= middleC);
-            leftHandNotes = notes.filter(n => n.midi < middleC);
+            } else {
+                // Hands separately: split at middle C
+                rightHandNotes = notes.filter(n => n.midi >= middleC);
+                leftHandNotes = notes.filter(n => n.midi < middleC);
+            }
         }
         
         this.container.innerHTML = `
@@ -429,9 +546,16 @@ class ScaleChallenge {
             // Calculate notes to show based on scale type (ascending + descending)
             // Major/Minor scales: 2 octaves up + down = 15 + 15 - 1 = 29 notes
             // Chromatic scales: 1 octave up + down = 13 + 13 - 1 = 25 notes
-            // Arpeggios: 2 octaves up + down = 9 + 9 - 1 = 17 notes
+            // Regular arpeggios: 2 octaves up + down = 9 + 9 - 1 = 17 notes
+            // Dominant 7th arpeggios: 2 octaves ascending (9) + 2 octaves descending (8) = 17 notes (no resolution shown)
             let notesPerDisplay;
-            if (scale.type === 'arpeggio') {
+            if (scale.category === 'dominant7-arpeggio') {
+                // Dominant 7th arpeggios: show 2 octaves only (same as regular arpeggios)
+                // 4 notes per octave, 2 octaves = 8 notes + starting note = 9 ascending
+                // Coming back down = 8 notes
+                // Total = 17 notes (don't show the resolution note in the 2-octave display)
+                notesPerDisplay = 17;
+            } else if (scale.type === 'arpeggio') {
                 notesPerDisplay = 17;
             } else if (scale.category === 'chromatic') {
                 notesPerDisplay = 25;
@@ -451,8 +575,8 @@ class ScaleChallenge {
             const convertToVexNotes = (notes, maxNotes = notesPerDisplay, debugLabel = '', clef = 'treble') => {
                 const notesToConvert = notes.slice(0, maxNotes);
                 const result = notesToConvert.map((note, index) => {
-                    // Parse note name (e.g., "C4" -> note: "C", octave: "4")
-                    const match = note.name.match(/^([A-G][#b]?)(\d+)$/);
+                    // Parse note name (e.g., "C4" -> note: "C", octave: "4", or "Dn4" -> note: "D", octave: "4", natural: true)
+                    const match = note.name.match(/^([A-G][#bn]?)(\d+)$/);
                     if (!match) return null;
                     
                     const [, noteName, octave] = match;
@@ -461,9 +585,10 @@ class ScaleChallenge {
                     // Handle accidentals
                     const hasSharp = noteName.includes('#');
                     const hasFlat = noteName.includes('b');
+                    const hasNatural = noteName.includes('n');
                     
                     // Remove accidental from note name for VexFlow
-                    if (hasSharp || hasFlat) {
+                    if (hasSharp || hasFlat || hasNatural) {
                         vexNoteName = noteName[0].toLowerCase();
                     }
                     
@@ -487,12 +612,13 @@ class ScaleChallenge {
                     // 2. Harmonic/melodic minor (for chromatic alterations like raised 7th)
                     // 3. Unusual notes that aren't in standard key signatures (B#, Cb, Fb)
                     // 4. Natural notes in sharp keys (E in F# major, etc.)
-                    // Note: E# in F# major is covered by the key signature, so we don't add it
+                    // Note: Dominant 7th arpeggios use key signature, no extra accidentals needed
                     const isUnusualNote = noteName === 'B#' || noteName === 'Cb' || noteName === 'Fb';
                     
                     // Check if this is a natural note in a sharp key that needs a natural sign
                     const needsNaturalSign = (scale.key === 'F#' && noteName === 'E') ||
-                                           (scale.key === 'C#' && noteName === 'B');
+                                           (scale.key === 'C#' && noteName === 'B') ||
+                                           hasNatural; // Explicitly marked with 'n' (like "Dn4")
                     
                     if (scale.category === 'chromatic' || 
                         scale.category === 'minorHarmonic' || 
@@ -502,6 +628,8 @@ class ScaleChallenge {
                             vexNote.addModifier(new VF.Accidental('#'), 0);
                         } else if (hasFlat) {
                             vexNote.addModifier(new VF.Accidental('b'), 0);
+                        } else if (hasNatural) {
+                            vexNote.addModifier(new VF.Accidental('n'), 0);
                         }
                     } else if (needsNaturalSign) {
                         vexNote.addModifier(new VF.Accidental('n'), 0);

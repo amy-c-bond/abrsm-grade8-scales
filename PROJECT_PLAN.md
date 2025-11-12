@@ -166,9 +166,21 @@ A single-page HTML application designed to help ABRSM Grade 8 pianists practice 
     - VexFlow voice timing accounts for mixed note durations
     - Hand splitting at C2 (left) and F3 (right) minimums
     - F# Major scale uses E# instead of F (correct enharmonic spelling)
-    - Contrary motion scales properly implemented (hands move in opposite directions)
+    - **Contrary motion scales properly implemented** (both hands start on same note, move in opposite directions)
+    - **Pre-defined contrary motion note arrays** in scales-data.js (rightHand.notes, leftHand.notes)
+    - **Correct left hand descending pattern** using proper scale intervals
     - 2nd inversion arpeggios start on 5th of chord with correct intervals
+    - **2nd inversion audio playback** using majorArpeggio2ndInv/minorArpeggio2ndInv intervals
     - Database version 2 with auto-repopulation (35 scales)
+  - ✅ **Dominant 7th Arpeggios Implementation**:
+    - Changed from C7/Eb7/F#7/A7 to G7/Bb7/C#7/E7 (V7 chords in respective keys)
+    - 4-octave range with resolution to tonic at end (A3, C3, Eb3, F#3)
+    - E2 minimum for left hand (bass clef)
+    - Notation displays 2 octaves, audio plays full 4 octaves
+    - Descending pattern: skips final E3, goes directly to resolution (B3→G#3→A3)
+    - Pre-defined note arrays in scales-data.js to avoid regeneration
+    - Separate dominant7-arpeggio category from regular arpeggios
+    - Audio uses pre-defined descending notes (no reverse operation)
   - 📋 **Future Enhancements** (GitHub Issues Created):
     - Issue #6: Time signature selector for metronome (3/4, 2/4, 6/8, 5/4, 7/8)
     - Issue #3: Next scale button for continuous practice flow
